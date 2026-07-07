@@ -1,0 +1,213 @@
+.contact-page {
+    background: var(--bg-subtle);
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* Info */
+.contact-info {
+    background: var(--gray-800);
+    border-radius: var(--radius-2xl);
+    padding: 2.5rem;
+    color: white;
+    position: sticky;
+    top: 5.5rem;
+}
+
+.contact-info__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.75rem;
+}
+
+.contact-info__desc {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+.contact-info__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.contact-info__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    text-decoration: none;
+    padding: 0.875rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all var(--transition);
+}
+
+.contact-info__item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(179, 0, 6, 0.3);
+}
+
+.contact-info__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: rgba(179, 0, 6, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--red-400);
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.contact-info__item:hover .contact-info__icon {
+    background: var(--primary);
+    color: white;
+}
+
+.contact-info__label {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+}
+
+.contact-info__value {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.contact-info__map {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.contact-info__map iframe {
+    display: block;
+}
+
+/* Form */
+.contact-form-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.contact-form__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+}
+
+.contact-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-input--error {
+    border-color: var(--primary) !important;
+    background: var(--red-50);
+}
+
+.form-error {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--primary);
+    margin-top: 0.375rem;
+    font-weight: 500;
+}
+
+.contact-form__submit {
+    width: 100%;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+
+.contact-form__submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.contact-form__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success state */
+.contact-success {
+    text-align: center;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.contact-success__icon {
+    color: var(--primary);
+}
+
+.contact-success h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.contact-success p {
+    color: var(--text-secondary);
+    max-width: 320px;
+    line-height: 1.7;
+}
+
+@media (max-width: 1024px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-info {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .contact-form__row {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-form-wrap,
+    .contact-info {
+        padding: 1.75rem;
+    }
+}

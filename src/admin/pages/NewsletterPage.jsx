@@ -1,0 +1,161 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { newsletterService } from '../services/newsletterService'
+import DataTable from '../components/ui/DataTable'
+import SearchBar from '../components/ui/SearchBar'
+import Select from '../components/ui/Select'
+import FilterBar from '../components/ui/FilterBar'
+import Pagination from '../components/ui/Pagination'
+import ConfirmationDialog from '../components/ui/ConfirmationDialog'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
+import EmptyState from '../components/ui/EmptyState'
+import ErrorState from '../components/ui/ErrorState'
+import { Toast } from '../components/ui/Toast'
+
+const statusOptions = [
+  { value: 'all', label: 'Tous' },
+  { value: 'active', label: 'Actifs' },
+  { value: 'unsubscribed', label: 'Désinscrits' },
+]
+
+function formatDate(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('fr-MA', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+export default function NewsletterPage() {
+  const [items, setItems] = useState([])
+  const [stats, setStats] = useState({ total: 0, active: 0, unsubscribed: 0 })
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 15, total: 0 })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState('all')
+  const [page, setPage] = useState(1)
+  const [deactivating, setDeactivating] = useState(null)
+  const [actionLoading, setActionLoading] = useState(false)
+
+  const load = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const result = await newsletterService.getSubscribers({
+        q: query,
+        status,
+        page,
+        perPage: 15,
+        sort: 'subscribed_at',
+        dir: 'desc',
+      })
+      setItems(result.data || [])
+      setStats(result.stats || { total: 0, active: 0, unsubscribed: 0 })
+      setMeta(result.meta || { current_page: 1, last_page: 1, per_page: 15, total: 0 })
+    } catch {
+      setError('Erreur de chargement des abonnés.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    load()
+  }, [page, status])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1)
+      load()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  const deactivate = async () => {
+    if (!deactivating) return
+    setActionLoading(true)
+    try {
+      await newsletterService.deactivateSubscriber(deactivating.id)
+      Toast.success('Abonné désactivé.')
+      setDeactivating(null)
+      load()
+    } catch {
+      Toast.error('Impossible de désactiver cet abonné.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  if (loading && items.length === 0) return <LoadingSpinner label="Chargement newsletter..." />
+  if (error) return <ErrorState message={error} onRetry={load} />
+
+  return (
+    <section className="admin-page">
+      <div className="admin-page__head">
+        <h1>Newsletter</h1>
+      </div>
+
+      <div className="admin-stats-grid">
+        <div className="admin-stat card"><div className="card-body"><p>Total</p><strong>{stats.total}</strong></div></div>
+        <div className="admin-stat card"><div className="card-body"><p>Actifs</p><strong>{stats.active}</strong></div></div>
+        <div className="admin-stat card"><div className="card-body"><p>Désinscrits</p><strong>{stats.unsubscribed}</strong></div></div>
+      </div>
+
+      <FilterBar>
+        <SearchBar value={query} onChange={setQuery} placeholder="Rechercher par email..." />
+        <Select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }} options={statusOptions} />
+      </FilterBar>
+
+      {items.length === 0 ? (
+        <EmptyState title="Aucun abonné" />
+      ) : (
+        <>
+          <DataTable
+            columns={[
+              { key: 'email', label: 'Email' },
+              {
+                key: 'isActive',
+                label: 'Statut',
+                render: (value) => (value ? 'Actif' : 'Désinscrit'),
+              },
+              {
+                key: 'subscribedAt',
+                label: 'Inscrit le',
+                render: (value) => formatDate(value),
+              },
+              {
+                key: 'unsubscribedAt',
+                label: 'Désinscrit le',
+                render: (value) => formatDate(value),
+              },
+            ]}
+            rows={items}
+            sortKey="subscribedAt"
+            sortDir="desc"
+            onSort={() => {}}
+            actions={(row) => (
+              row.isActive ? (
+                <button className="btn btn-sm btn-primary" onClick={() => setDeactivating(row)}>
+                  Désactiver
+                </button>
+              ) : null
+            )}
+          />
+          <Pagination page={meta.current_page} totalPages={meta.last_page} onChange={setPage} />
+        </>
+      )}
+
+      <ConfirmationDialog
+        open={!!deactivating}
+        title="Désactiver cet abonné ?"
+        message={deactivating ? deactivating.email : ''}
+        onCancel={() => setDeactivating(null)}
+        onConfirm={deactivate}
+        loading={actionLoading}
+      />
+    </section>
+  )
+}

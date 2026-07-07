@@ -1,0 +1,99 @@
+.whyus {
+    background: var(--gray-900);
+    position: relative;
+    overflow: hidden;
+}
+
+.whyus__bg {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 50%, rgba(179, 0, 6, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(179, 0, 6, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.whyus .section-label {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.whyus__title {
+    color: white;
+    margin: 0.75rem 0 1rem;
+}
+
+.whyus__subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 520px;
+    margin: 0 auto 3rem;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+}
+
+.whyus__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.whyus-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-xl);
+    padding: 2rem 1.75rem;
+    transition: all var(--transition);
+}
+
+.whyus-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(179, 0, 6, 0.35);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.whyus-card__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    background: rgba(179, 0, 6, 0.15);
+    border: 1px solid rgba(179, 0, 6, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--red-400);
+    margin-bottom: 1.25rem;
+    transition: all var(--transition);
+}
+
+.whyus-card:hover .whyus-card__icon {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.whyus-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.625rem;
+}
+
+.whyus-card__desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.7;
+}
+
+@media (max-width: 1024px) {
+    .whyus__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .whyus__grid {
+        grid-template-columns: 1fr;
+    }
+}
