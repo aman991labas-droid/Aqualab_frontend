@@ -32,9 +32,15 @@ export default function RootLayout({ children }) {
     <html
       lang="fr"
       className={`${inter.variable} ${poppins.variable}`}
+      data-theme="light"
       suppressHydrationWarning
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('aqualab-theme');document.documentElement.setAttribute('data-theme',t==='dark'||t==='light'?t:'light');document.documentElement.style.colorScheme=t==='dark'?'dark':'light';}catch(e){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.colorScheme='light';}})();`,
+          }}
+        />
         <link rel="icon" href="/logoicone.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/logoicone.jpg" />
       </head>

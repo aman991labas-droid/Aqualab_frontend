@@ -6,6 +6,8 @@
 
 /* ── Variables ─────────────────────────────── */
 :root {
+  color-scheme: light;
+
   /* Brand Colors */
   --red-900: #7a0003;
   --red-800: #9b0004;

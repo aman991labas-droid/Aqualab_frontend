@@ -11,6 +11,7 @@ import Modal from '../components/ui/Modal'
 import ConfirmationDialog from '../components/ui/ConfirmationDialog'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
+import FormFileField from '../components/ui/FormFileField'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import EmptyState from '../components/ui/EmptyState'
 import ErrorState from '../components/ui/ErrorState'
@@ -352,7 +353,7 @@ export default function ProductsPage() {
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier la catégorie produit' : 'Ajouter une catégorie produit'}>
-        <form className="admin-form-grid" onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form className="admin-form-stack" onSubmit={save}>
           
           <Select
             label="Catégorie principale"
@@ -370,22 +371,14 @@ export default function ProductsPage() {
             error={errors.title}
           />
 
-          {/* Group Image Block */}
-          <div style={{ background: '#f4f6f8', padding: '14px', borderRadius: '6px' }}>
-            <label style={{ display: 'block', fontSize: '14px', marginBottom: '6px', fontWeight: '600' }}>Image principale de la catégorie</label>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={(e) => handleFileUpload(e, 'groupImage')}
-              style={{ display: 'block', width: '100%' }}
-            />
-            {form.groupImage && (
-              <img src={form.groupImage} alt="Preview" style={{ height: '60px', borderRadius: '4px', marginTop: '8px', objectFit: 'cover' }} />
-            )}
-          </div>
-          
-          {/* Partner Block */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f9f9f9', padding: '14px', borderRadius: '6px' }}>
+          <FormFileField
+            label="Image principale de la catégorie"
+            accept="image/*"
+            onChange={(e) => handleFileUpload(e, 'groupImage')}
+            preview={form.groupImage}
+          />
+
+          <div className="admin-grid-2">
             <Input
               label="Marque / Partenaire"
               required
@@ -394,34 +387,28 @@ export default function ProductsPage() {
               onChange={(e) => handleFieldChange('partner', e.target.value)}
               error={errors.partner}
             />
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', marginBottom: '4px', fontWeight: '500' }}>Logo du partenaire</label>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => handleFileUpload(e, 'partnerLogo')}
-                style={{ display: 'block', width: '100%', padding: '6px 0' }}
-              />
-              {form.partnerLogo && (
-                <img src={form.partnerLogo} alt="Preview" style={{ height: '30px', marginTop: '4px', objectFit: 'contain' }} />
-              )}
-            </div>
+            <FormFileField
+              label="Logo du partenaire"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e, 'partnerLogo')}
+              preview={form.partnerLogo}
+              previewClassName="admin-image-preview--logo"
+            />
           </div>
 
-          <hr style={{ border: '0', borderTop: '1px solid #ddd', margin: '5px 0' }} />
+          <hr className="admin-form-divider" />
           
-          {/* Products Dynamic Section */}
           <div>
-            <label style={{ fontWeight: '600', marginBottom: '12px', display: 'block', fontSize: '16px' }}>Liste des modèles de produits</label>
+            <label className="admin-form-section-title">Liste des modèles de produits</label>
             
             {form.items.map((item, index) => (
-              <div key={index} style={{ borderLeft: '3px solid #007bff', paddingLeft: '12px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '500', fontSize: '14px', color: '#555' }}>Modèle #{index + 1}</span>
+              <div key={index} className="admin-product-item">
+                <div className="admin-product-item__header">
+                  <span className="admin-product-item__title">Modèle #{index + 1}</span>
                   {form.items.length > 1 && (
-                    <button 
-                      type="button" 
-                      style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontSize: '13px' }}
+                    <button
+                      type="button"
+                      className="admin-form-remove-btn"
                       onClick={() => removeItemField(index)}
                     >
                       Enlever ce produit
@@ -429,7 +416,7 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="admin-grid-2">
                   <Input
                     label="Nom du modèle"
                     required
@@ -438,18 +425,13 @@ export default function ProductsPage() {
                     onChange={(e) => handleItemFieldChange(index, 'name', e.target.value)}
                     error={errors.items?.[index]?.name}
                   />
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', marginBottom: '4px', fontWeight: '500' }}>Photo du modèle</label>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={(e) => handleItemImageUpload(index, e.target.files[0])}
-                      style={{ display: 'block', width: '100%', padding: '6px 0' }}
-                    />
-                    {item.image && (
-                      <img src={item.image} alt="Preview" style={{ height: '35px', marginTop: '4px', objectFit: 'contain' }} />
-                    )}
-                  </div>
+                  <FormFileField
+                    label="Photo du modèle"
+                    accept="image/*"
+                    onChange={(e) => handleItemImageUpload(index, e.target.files?.[0])}
+                    preview={item.image}
+                    previewClassName="admin-image-preview--model"
+                  />
                 </div>
 
                 <Textarea
@@ -462,17 +444,16 @@ export default function ProductsPage() {
               </div>
             ))}
 
-            <button 
-              type="button" 
-              className="btn btn-outline-dark" 
-              style={{ marginTop: '8px', width: '100%', borderStyle: 'dashed' }} 
+            <button
+              type="button"
+              className="btn btn-outline-dark admin-form-add-btn"
               onClick={addItemField}
             >
               + Ajouter un autre modèle à ce groupe
             </button>
           </div>
 
-          <div className="admin-actions" style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          <div className="admin-actions">
             <button type="button" className="btn btn-outline-dark" onClick={() => setModalOpen(false)}>
               Annuler
             </button>

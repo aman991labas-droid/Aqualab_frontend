@@ -82,6 +82,41 @@
   color: var(--text-primary);
 }
 
+[data-theme="dark"] .admin-file-upload {
+  background: #1a2540;
+  border-color: #3b4d6b;
+  color: #c4d0e0;
+}
+
+[data-theme="dark"] .admin-file-upload:hover {
+  background: #243044;
+  border-color: #ff2929;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-modal .form-input,
+[data-theme="dark"] .admin-modal .form-textarea,
+[data-theme="dark"] .admin-modal select.form-input {
+  background: #1a2540;
+  border-color: #3b4d6b;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-modal .form-label,
+[data-theme="dark"] .admin-modal .admin-form-section-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .admin-modal {
+  background: #1a2332;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-modal__head,
+[data-theme="dark"] .admin-modal__body {
+  background: #1a2332;
+}
+
 [data-theme="dark"] .admin-table th {
   color: var(--text-secondary);
 }
