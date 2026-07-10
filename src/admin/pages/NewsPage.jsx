@@ -28,7 +28,7 @@ const emptyForm = {
   content: '',
   category: 'laboratoire',
   image: '',
-  author: { name: '', avatar: '' },
+  author: { name: 'Equipe Aqualab', avatar: '/images/logo.png' },
   date: '',
   readTime: 5,
   featured: false,
@@ -38,7 +38,7 @@ function validateArticle(form) {
   const errors = {}
   if (!form.title?.trim()) errors.title = 'Titre requis.'
   if (!form.slug?.trim()) errors.slug = 'Slug requis.'
-  if (!form.excerpt?.trim()) errors.excerpt = 'Extrait requis.'
+  if (!form.excerpt?.trim()) errors.excerpt = 'Idée générale requise.'
   if (!form.content?.trim()) errors.content = 'Contenu requis.'
   if (!form.category) errors.category = 'Catégorie requise.'
   if (!form.image?.trim()) errors.image = 'Image requise.'
@@ -72,6 +72,7 @@ export default function NewsPage() {
   const [previewOpen, setPreviewOpen] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [previewImg, setPreviewImg] = useState('')
+  const [previewAvatar, setPreviewAvatar] = useState('')
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
 
@@ -99,7 +100,7 @@ export default function NewsPage() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase()
     return items.filter((i) => {
-      const byText = i.title.toLowerCase().includes(q) || i.excerpt.toLowerCase().includes(q)
+      const byText = i.title.toLowerCase().includes(q) || (i.excerpt && i.excerpt.toLowerCase().includes(q))
       const byCategory = categoryFilter === 'all' || i.category === categoryFilter
       const byFeatured =
         featuredFilter === 'all' ||
@@ -118,6 +119,7 @@ export default function NewsPage() {
     setEditing(null)
     setForm({ ...emptyForm, category: categories[0]?.id || 'laboratoire' })
     setPreviewImg('')
+    setPreviewAvatar('/images/logo.png')
     setErrors({})
     setModalOpen(true)
   }
@@ -137,6 +139,7 @@ export default function NewsPage() {
       featured: item.featured,
     })
     setPreviewImg(item.image)
+    setPreviewAvatar(item.author?.avatar || '/images/logo.png')
     setErrors({})
     setModalOpen(true)
   }
@@ -184,7 +187,7 @@ export default function NewsPage() {
       <div className="admin-page__head">
         <h1>Actualités</h1>
         <button className="btn btn-primary" onClick={openCreate}>
-          Nouvel article
+          Nouvel actualité
         </button>
       </div>
       
@@ -247,11 +250,11 @@ export default function NewsPage() {
         </>
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier l\'article' : 'Créer un article'} width="760px">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier l\'actualité' : 'Créer une actualité'} width="760px">
         <form className="admin-form-grid" onSubmit={save}>
           <Input label="title" required value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} error={errors.title} />
           <Input label="slug" required value={form.slug} onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))} error={errors.slug} />
-          <Textarea label="excerpt" required value={form.excerpt} onChange={(e) => setForm((p) => ({ ...p, excerpt: e.target.value }))} error={errors.excerpt} rows={3} />
+          <Textarea label="Idée générale" required value={form.excerpt} onChange={(e) => setForm((p) => ({ ...p, excerpt: e.target.value }))} error={errors.excerpt} rows={3} />
           <RichTextEditor label="content" required value={form.content} onChange={(value) => setForm((p) => ({ ...p, content: value }))} error={errors.content} />
           <Select
             label="category"
@@ -278,7 +281,23 @@ export default function NewsPage() {
           {errors.image && <span className="form-error">{errors.image}</span>}
           <div className="admin-grid-2">
             <Input label="author.name" required value={form.author.name} onChange={(e) => setForm((p) => ({ ...p, author: { ...p.author, name: e.target.value } }))} error={errors.authorName} />
-            <Input label="author.avatar" value={form.author.avatar} onChange={(e) => setForm((p) => ({ ...p, author: { ...p.author, avatar: e.target.value } }))} placeholder="/images/team/expert.jpg" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label className="admin-label">author.avatar</label>
+              <ImageUpload
+                preview={previewAvatar}
+                onFileChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const dataUrl = await fileToBase64(file)
+                    setPreviewAvatar(dataUrl)
+                    setForm((p) => ({ ...p, author: { ...p.author, avatar: dataUrl } }))
+                  } catch {
+                    Toast.error("Erreur lors du chargement de l'image.")
+                  }
+                }}
+              />
+            </div>
           </div>
           <div className="admin-grid-2">
             <Input label="date" type="date" required value={form.date} onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))} error={errors.date} />

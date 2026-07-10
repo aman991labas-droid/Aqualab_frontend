@@ -21,4 +21,12 @@ export const newsletterService = {
   async deactivateSubscriber(id) {
     return adminFetch(`/api/admin/newsletter/subscribers/${id}`, { method: 'DELETE' })
   },
+
+  async addSubscriber(email) {
+    return adminFetch(`/api/admin/newsletter/subscribers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+  },
 }

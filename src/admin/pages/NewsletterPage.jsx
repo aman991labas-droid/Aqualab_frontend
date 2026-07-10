@@ -7,6 +7,8 @@ import SearchBar from '../components/ui/SearchBar'
 import Select from '../components/ui/Select'
 import FilterBar from '../components/ui/FilterBar'
 import Pagination from '../components/ui/Pagination'
+import Modal from '../components/ui/Modal'
+import Input from '../components/ui/Input'
 import ConfirmationDialog from '../components/ui/ConfirmationDialog'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import EmptyState from '../components/ui/EmptyState'
@@ -35,10 +37,14 @@ export default function NewsletterPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
-  const [status, setStatus] = useState('all')
+  const [status, setStatus] = useState('active')
   const [page, setPage] = useState(1)
   const [deactivating, setDeactivating] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [addEmail, setAddEmail] = useState('')
+  const [addError, setAddError] = useState('')
+  const [addLoading, setAddLoading] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -79,13 +85,39 @@ export default function NewsletterPage() {
     setActionLoading(true)
     try {
       await newsletterService.deactivateSubscriber(deactivating.id)
-      Toast.success('Abonné désactivé.')
+      Toast.success('Abonné supprimé.')
       setDeactivating(null)
       load()
     } catch {
-      Toast.error('Impossible de désactiver cet abonné.')
+      Toast.error('Impossible de supprimer cet abonné.')
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  const openAddModal = () => {
+    setAddEmail('')
+    setAddError('')
+    setAddModalOpen(true)
+  }
+
+  const handleAdd = async (e) => {
+    e.preventDefault()
+    const trimmed = addEmail.trim()
+    if (!trimmed) { setAddError('Veuillez saisir un email.'); return }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmed)) { setAddError('Email invalide.'); return }
+    setAddLoading(true)
+    setAddError('')
+    try {
+      const res = await newsletterService.addSubscriber(trimmed)
+      Toast.success(res?.message || 'Abonné ajouté avec succès.')
+      setAddModalOpen(false)
+      load()
+    } catch (err) {
+      setAddError(err?.message || "Impossible d'ajouter cet abonné.")
+    } finally {
+      setAddLoading(false)
     }
   }
 
@@ -96,6 +128,9 @@ export default function NewsletterPage() {
     <section className="admin-page">
       <div className="admin-page__head">
         <h1>Newsletter</h1>
+        <button className="btn btn-primary" onClick={openAddModal}>
+          + Ajouter un abonné
+        </button>
       </div>
 
       <div className="admin-stats-grid">
@@ -137,11 +172,9 @@ export default function NewsletterPage() {
             sortDir="desc"
             onSort={() => {}}
             actions={(row) => (
-              row.isActive ? (
-                <button className="btn btn-sm btn-primary" onClick={() => setDeactivating(row)}>
-                  Désactiver
-                </button>
-              ) : null
+              <button className="btn btn-sm btn-primary" onClick={() => setDeactivating(row)}>
+                Supprimer
+              </button>
             )}
           />
           <Pagination page={meta.current_page} totalPages={meta.last_page} onChange={setPage} />
@@ -150,12 +183,48 @@ export default function NewsletterPage() {
 
       <ConfirmationDialog
         open={!!deactivating}
-        title="Désactiver cet abonné ?"
+        title="Supprimer cet abonné ?"
         message={deactivating ? deactivating.email : ''}
         onCancel={() => setDeactivating(null)}
         onConfirm={deactivate}
         loading={actionLoading}
       />
+
+      <Modal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        title="Ajouter un abonné à la newsletter"
+        width="440px"
+      >
+        <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <Input
+            label="Adresse email"
+            type="email"
+            required
+            value={addEmail}
+            onChange={(e) => { setAddEmail(e.target.value); setAddError('') }}
+            placeholder="exemple@email.com"
+            error={addError}
+          />
+          <div className="admin-actions">
+            <button
+              type="button"
+              className="btn btn-outline-dark"
+              onClick={() => setAddModalOpen(false)}
+              disabled={addLoading}
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={addLoading}
+            >
+              {addLoading ? 'Ajout en cours...' : 'Ajouter'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </section>
   )
 }

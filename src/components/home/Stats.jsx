@@ -9,15 +9,15 @@ import './Stats.css'
 const CountUp = CountUpModule.default || CountUpModule
 
 const stats = [
-    { icon: Calendar, value: 2006, suffix: '', label: 'Année de Création', decimal: 0 },
-    { icon: Building2, value: 'S.A.R.L', suffix: '', label: 'Forme Juridique', isText: true },
-    { icon: Warehouse, value: 1200, suffix: ' M²', label: 'Surface de stockage', decimal: 0 },
-    { icon: TrendingUp, value: 62, suffix: 'M DH', label: "Chiffre d'affaires", decimal: 0 },
-    { icon: Coins, value: 2, suffix: 'M DH', label: 'Capital Social', decimal: 0 },
-    { icon: Users, value: 32, suffix: '+', label: "Nombre d'employés", decimal: 0 },
+    { icon: Calendar, value: 2006, suffix: '', label: 'Année de Création', decimal: 0 , separator:''},
+    { icon: Building2, value: 'S.A.R.L', suffix: '', label: 'Forme Juridique', isText: true , separator:''},
+    { icon: Warehouse, value: 1200, suffix: ' M²', label: 'Surface de stockage', decimal: 0 , separator:','},
+    { icon: TrendingUp, value: 62, suffix: 'M DH', label: "Chiffre d'affaires", decimal: 0 , separator:''},
+    { icon: Coins, value: 2, suffix: 'M DH', label: 'Capital Social', decimal: 0 , separator:','},
+    { icon: Users, value: 32, suffix: '+', label: "Nombre d'employés", decimal: 0 , separator:''},
 ]
 
-function StatCard({ icon: Icon, value, suffix, label, decimal, isText, index }) {
+function StatCard({ icon: Icon, value, suffix, label, decimal, isText, index, separator }) {
     const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.3 })
 
     return (
@@ -30,7 +30,7 @@ function StatCard({ icon: Icon, value, suffix, label, decimal, isText, index }) 
                     {isText
                         ? <span>{value}</span>
                         : inView
-                            ? <CountUp end={value} duration={2.4} decimals={decimal} suffix={suffix} delay={index * 0.1} />
+                            ? <CountUp end={value} duration={2.4} decimals={decimal} suffix={suffix} delay={index * 0.1} separator={separator} />
                             : '0'
                     }
                 </div>
