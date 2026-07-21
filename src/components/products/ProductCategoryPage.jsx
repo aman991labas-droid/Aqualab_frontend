@@ -22,7 +22,7 @@ export default function ProductCategoryPage({
     const groupCategories = (allCategories ?? []).filter((item) => item.group === category.group)
     const siblings = groupCategories.filter(c => c.slug !== category.slug)
     const relatedArticles = relatedArticlesProp ?? []
-    const partnerName = category.partner.split('—')[0].trim()
+    const partnerName = category.partner?.split('—')[0]?.trim() ?? ""
     const items = category.items ?? []
     const breadcrumbs = [
         { label: 'Produits', path: '/produits' },

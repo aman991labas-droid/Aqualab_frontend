@@ -97,7 +97,7 @@ export function buildProductSchema(category) {
         name: category.title,
         description: category.seo?.description ?? category.shortDesc,
         image: category.image ? resolveAbsoluteUrl(category.image) : undefined,
-        brand: { '@type': 'Brand', name: category.partner.split('—')[0].trim() },
+        brand: { '@type': 'Brand',   name: category.partner?.split('—')[0]?.trim() ?? ""},
         url,
         offers: {
             '@type': 'Offer',

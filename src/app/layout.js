@@ -1,5 +1,6 @@
 import { Inter, Poppins } from 'next/font/google'
 import AppProviders from '@/components/providers/AppProviders'
+import Script from "next/script";
 import JsonLd from '@/components/seo/JsonLd'
 import { buildPageMetadata } from '@/lib/metadata'
 import { organizationSchema, websiteSchema } from '@/data/seo'
@@ -36,14 +37,17 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('aqualab-theme');document.documentElement.setAttribute('data-theme',t==='dark'||t==='light'?t:'light');document.documentElement.style.colorScheme=t==='dark'?'dark':'light';}catch(e){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.colorScheme='light';}})();`,
-          }}
-        />
-        <link rel="icon" href="/logoicone.jpg" type="image/jpeg" />
-        <link rel="apple-touch-icon" href="/logoicone.jpg" />
-      </head>
+  <Script
+    id="theme-init"
+    strategy="beforeInteractive"
+    dangerouslySetInnerHTML={{
+      __html: `(function(){try{var t=localStorage.getItem('aqualab-theme');document.documentElement.setAttribute('data-theme',t==='dark'||t==='light'?t:'light');document.documentElement.style.colorScheme=t==='dark'?'dark':'light';}catch(e){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.colorScheme='light';}})();`,
+    }}
+  />
+
+  <link rel="icon" href="/logoicone.jpg" type="image/jpeg" />
+  <link rel="apple-touch-icon" href="/logoicone.jpg" />
+</head>
       <body suppressHydrationWarning>
         <JsonLd data={[organizationSchema, websiteSchema]} idPrefix="site-json-ld" />
         <AppProviders>{children}</AppProviders>
