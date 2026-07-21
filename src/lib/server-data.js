@@ -35,6 +35,12 @@ export async function getMainCategories() {
   return []
 }
 
+export async function getPartners() {
+  const data = await fetchApi('/api/partners')
+  if (Array.isArray(data) && data.length > 0) return data
+  return []
+}
+
 export async function getCategoryBySlug(slug) {
   const data = await fetchApi(`/api/categories/${slug}`)
   if (data?.slug) return data

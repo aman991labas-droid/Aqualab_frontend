@@ -8,7 +8,7 @@ import ProductsHighlight from '@/components/home/ProductsHighlight'
 import ServicesSection from '@/components/home/ServicesSection'
 import WhyUs from '@/components/home/WhyUs'
 import CTABanner from '@/components/home/CTABanner'
-import { getAllCategories } from '@/lib/server-data'
+import { getAllCategories, getPartners } from '@/lib/server-data'
 
 export const metadata = buildPageMetadata({
   title: 'Aqualab Technologie – Matériels Industriels & Scientifiques au Maroc',
@@ -19,14 +19,14 @@ export const metadata = buildPageMetadata({
 })
 
 export default async function HomePage() {
-  const categories = await getAllCategories()
+  const [categories, partners] = await Promise.all([getAllCategories(), getPartners()])
 
   return (
     <>
       <JsonLd data={localBusinessSchema} />
       <Hero />
       <Stats />
-      <Partners />
+      <Partners partners={partners} />
       <ProductsHighlight categories={categories} />
       <ServicesSection />
       <WhyUs />

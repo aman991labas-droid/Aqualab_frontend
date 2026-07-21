@@ -135,7 +135,7 @@
 }
 
 .footer__link--accent {
-    color: var(--red-400);
+    color: #fca5a5;
     font-weight: 600;
     margin-top: 0.25rem;
 }
@@ -194,7 +194,7 @@
 
 .footer__legal {
     font-size: 0.8125rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.78);
 }
 
 /* Responsive */

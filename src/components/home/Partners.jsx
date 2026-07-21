@@ -5,7 +5,7 @@ import AppImage from '@/components/ui/AppImage'
 import { FadeUp } from '@/components/ui/Animations'
 import './Partners.css'
 
-const partners = [
+const defaultPartners = [
     { name: 'Leica Microsystems', specialty: 'Microscopie', logo: '/images/partners/leica_logo.png', url: 'https://www.leica-microsystems.com/' },
     { name: 'Tinius Olsen', specialty: 'Essais mécaniques', logo: '/images/partners/to_logo.png', url: 'https://www.tiniusolsen.com/' },
     { name: 'Metkon', specialty: 'Métallographie', logo: '/images/partners/metkon_logo.png', url: 'https://www.metkon.com/' },
@@ -19,12 +19,19 @@ const partners = [
 
 function PartnerLogoItem({ partner }) {
     const [logoFailed, setLogoFailed] = useState(false)
+    const href = partner.url || '#'
 
     return (
         <div className="partners__logo-box">
-            <a href={partner.url} target="_blank" rel="noopener noreferrer" aria-label={`En savoir plus sur ${partner.name}`}>
+            <a
+                className="partners__logo-link"
+                href={href}
+                target={partner.url ? '_blank' : undefined}
+                rel={partner.url ? 'noopener noreferrer' : undefined}
+                aria-label={`En savoir plus sur ${partner.name}`}
+            >
                 {logoFailed ? (
-                    <div className="partners__logo-fallback" style={{ display: 'flex' }}>
+                    <div className="partners__logo-fallback">
                         <span>{partner.name}</span>
                     </div>
                 ) : (
@@ -32,9 +39,8 @@ function PartnerLogoItem({ partner }) {
                         src={partner.logo}
                         alt={`${partner.name} – ${partner.specialty}`}
                         className={`partners__logo${partner.preserveContrast ? ' partners__logo--preserve' : ''}`}
-                        width={160}
-                        height={72}
-                        sizes="160px"
+                        fill
+                        sizes="128px"
                         fallbackSrc={null}
                         hideOnError
                         onError={() => setLogoFailed(true)}
@@ -45,7 +51,16 @@ function PartnerLogoItem({ partner }) {
     )
 }
 
-export default function Partners() {
+export default function Partners({ partners = defaultPartners }) {
+    const visiblePartners = (partners?.length ? partners : defaultPartners).filter(
+        (partner) => partner.isActive !== false
+    )
+
+    if (visiblePartners.length === 0) return null
+
+    const useMarquee = visiblePartners.length >= 5
+    const displayPartners = useMarquee ? [...visiblePartners, ...visiblePartners] : visiblePartners
+
     return (
         <section className="partners section-py" aria-labelledby="partners-heading">
             <div className="container">
@@ -61,10 +76,13 @@ export default function Partners() {
                     </div>
                 </FadeUp>
 
-                <div className="partners__track-wrap" aria-label="Logos partenaires">
-                    <div className="partners__track">
-                        {[...partners, ...partners].map((p, i) => (
-                            <div key={`${p.name}-${i}`} className="partners__item" aria-label={p.name}>
+                <div
+                    className={`partners__track-wrap${useMarquee ? '' : ' partners__track-wrap--static'}`}
+                    aria-label="Logos partenaires"
+                >
+                    <div className={`partners__track${useMarquee ? '' : ' partners__track--static'}`}>
+                        {displayPartners.map((p, i) => (
+                            <div key={`${p.id ?? p.name}-${i}`} className="partners__item" aria-label={p.name}>
                                 <PartnerLogoItem partner={p} />
                                 <span className="partners__specialty">{p.specialty}</span>
                             </div>

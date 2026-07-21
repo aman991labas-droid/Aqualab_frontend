@@ -175,7 +175,7 @@ export default function ActualitesPage({
                             </FadeUp>
 
                             {paged.length > 0 ? (
-                                <StaggerContainer className="actualites__grid">
+                                <StaggerContainer className="actualites__grid" key={`${category}-${page}`}>
                                     {paged.map(a => <ArticleCard key={a.id} article={a} categories={categories} />)}
                                 </StaggerContainer>
                             ) : (
@@ -254,8 +254,10 @@ export default function ActualitesPage({
 
                             <FadeUp delay={0.4}>
                                 <div className="blog-widget blog-widget--newsletter">
-                                    <Mail size={28} className="blog-newsletter__icon" aria-hidden="true" />
-                                    <h3 className="blog-widget__title">Newsletter</h3>
+                                    <div className="blog-newsletter__head">
+                                        <Mail size={22} className="blog-newsletter__icon" aria-hidden="true" />
+                                        <h3 className="blog-widget__title">Newsletter</h3>
+                                    </div>
                                     <p>Recevez nos dernières actualités directement dans votre boîte mail.</p>
                                     <NewsletterForm />
                                 </div>

@@ -9,6 +9,18 @@ export const initialMainCategories = [
   { id: 'industriel', label: 'Industriel', sortOrder: 1 },
 ]
 
+export const initialPartners = [
+  { id: 1, name: 'Leica Microsystems', specialty: 'Microscopie', url: 'https://www.leica-microsystems.com/', logo: '/images/partners/leica_logo.png', sortOrder: 0, preserveContrast: false, isActive: true },
+  { id: 2, name: 'Tinius Olsen', specialty: 'Essais mécaniques', url: 'https://www.tiniusolsen.com/', logo: '/images/partners/to_logo.png', sortOrder: 1, preserveContrast: false, isActive: true },
+  { id: 3, name: 'Metkon', specialty: 'Métallographie', url: 'https://www.metkon.com/', logo: '/images/partners/metkon_logo.png', sortOrder: 2, preserveContrast: false, isActive: true },
+  { id: 4, name: 'Vogel Germany', specialty: 'Métrologie', url: 'https://www.vogel.de/', logo: '/images/partners/vogel_logo.png', sortOrder: 3, preserveContrast: false, isActive: true },
+  { id: 5, name: 'Climats', specialty: 'Simulation climatique', url: 'https://www.climats.com/', logo: '/images/partners/climats_logo.png', sortOrder: 4, preserveContrast: false, isActive: true },
+  { id: 6, name: 'Desco', specialty: 'Automatisation industrielle', url: 'https://www.desco.com/', logo: '/images/partners/desco_logo.png', sortOrder: 5, preserveContrast: false, isActive: true },
+  { id: 7, name: 'Fetefilter', specialty: 'Filtration', url: 'https://www.fetefilter.com/', logo: '/images/partners/fetefilter_logo.png', sortOrder: 6, preserveContrast: false, isActive: true },
+  { id: 8, name: 'Vaisala', specialty: 'Météorologie', url: 'https://www.vaisala.com/', logo: '/images/partners/vaisala_logo.png', sortOrder: 7, preserveContrast: false, isActive: true },
+  { id: 9, name: 'Baltimore Aircoil Company', specialty: 'Refroidissement industriel', url: 'https://www.baltimoreaircoil.com/', logo: '/images/partners/bac_logo.png', sortOrder: 8, preserveContrast: true, isActive: true },
+]
+
 // Articles — same model as src/data/articles.js
 export const initialArticles = articles.map((a) => ({ ...a, author: { ...a.author } }))
 

@@ -471,7 +471,18 @@
 
 .blog-widget--newsletter .blog-widget__title {
     color: white;
-    border-color: var(--primary);
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.blog-newsletter__head {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--primary);
 }
 
 .blog-widget--newsletter p {
@@ -483,7 +494,7 @@
 
 .blog-newsletter__icon {
     color: var(--primary);
-    margin-bottom: 0.75rem;
+    flex-shrink: 0;
 }
 
 .blog-widget--newsletter .form-input {
