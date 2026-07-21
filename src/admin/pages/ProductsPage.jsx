@@ -17,6 +17,7 @@ import EmptyState from '../components/ui/EmptyState'
 import ErrorState from '../components/ui/ErrorState'
 import { Toast } from '../components/ui/Toast'
 import { compressImageFile } from '../utils/compressImage'
+import { categories } from '@/data/articles'
 
 const PAGE_SIZE = 8
 
@@ -34,7 +35,7 @@ const generateSlug = (text) => {
 }
 
 const emptyForm = { 
-  tabId: 'laboratoire', 
+  tabId: '', 
   title: '', 
   slug: '',
   metaTitle: '',
@@ -83,14 +84,14 @@ export default function ProductsPage() {
   // CENTRAL SEO AUTOMATION ENGINE
   // Whenever the worker edits regular text, we reconstruct professional SEO data out of sight
   const updateSEOData = (updatedForm) => {
-    const { title, partner, groupImage, partnerLogo, items } = updatedForm
+    const { title, partner, groupImage, partnerLogo, items, tabId } = updatedForm
     
     const slug = generateSlug(title)
-    const metaTitle = title && partner ? `${title} - ${partner}` : title
+    const metaTitle = title && partner ? `${title} - ${partner}`: tabId || ''     
     
     // Builds a natural Google snippet under 160 characters
     const metaDescription = title && partner 
-      ? `Découvrez notre gamme de ${title} de la marque ${partner}. Matériel de laboratoire de haute qualité adapté à vos exigences professionnelles.`
+      ? `Découvrez notre gamme de ${title} de la marque ${partner}. Matériel ${tabId} de haute qualité adapté à vos exigences professionnelles.`
       : ''
 
     const groupImageAlt = groupImage && title ? `Présentation visuelle de la gamme ${title}` : ''
@@ -182,7 +183,7 @@ export default function ProductsPage() {
   const validate = () => {
     const next = {}
     if (!form.title.trim()) next.title = 'Titre requis.'
-    if (!form.partner.trim()) next.partner = 'Partenaire requis.'
+    // if (!form.partner.trim()) next.partner = 'Partenaire requis.'
     
     const itemErrors = form.items.map((item) => {
       const err = {}
@@ -381,7 +382,6 @@ export default function ProductsPage() {
           <div className="admin-grid-2">
             <Input
               label="Marque / Partenaire"
-              required
               placeholder="Leica Microsystems"
               value={form.partner}
               onChange={(e) => handleFieldChange('partner', e.target.value)}

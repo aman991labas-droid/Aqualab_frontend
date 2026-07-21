@@ -46,12 +46,14 @@ function CatalogCard({ cat, showGroupBadge, groupLabel }) {
                     ) : null}
                     <PartnerLogo
                         src={cat.partnerLogo}
-                        name={cat.partner.split('—')[0].trim()}
+                        name={cat.partner?.split('—')[0]?.trim() ?? ""}
                         size="sm"
                     />
-                    <span className="badge badge-red products-catalog-card__partner">
-                        {cat.partner.split('—')[0].trim()}
-                    </span>
+                    {cat.partner && (
+                        <span className="badge badge-red products-catalog-card__partner">
+                            {cat.partner?.split('—')[0]?.trim() ?? ""}
+                        </span>
+                    )}
                 </div>
                 <h3 className="products-catalog-card__title">{cat.title}</h3>
                 <p className="products-catalog-card__desc">{cat.shortDesc}</p>
