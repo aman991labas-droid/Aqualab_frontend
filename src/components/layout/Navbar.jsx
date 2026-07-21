@@ -37,7 +37,7 @@ export default function Navbar() {
 
     return (
         <>
-            <header className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`} role="banner">
+            <header className={`navbar ${scrolled ? 'navbar--scrolled' : ''}${mobileOpen ? ' navbar--menu-open' : ''}`} role="banner">
                 <div className="navbar__inner container">
                     <Link href="/" className="navbar__logo" aria-label="Aqualab Technologie – Accueil">
                         <Image

@@ -35,6 +35,22 @@
   background: var(--border);
 }
 
+[data-theme="dark"] .navbar--menu-open {
+  background: rgba(11, 17, 32, 0.98);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .navbar--menu-open .navbar__logo-img {
+  filter: brightness(0) invert(1);
+}
+
+[data-theme="dark"] .navbar--menu-open .navbar__toggle,
+[data-theme="dark"] .navbar--menu-open .navbar__theme--mobile.theme-toggle {
+  color: var(--text-primary);
+  background: var(--bg-muted);
+  border-color: var(--border);
+}
+
 [data-theme="dark"] .navbar__mobile {
   background: var(--surface);
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);

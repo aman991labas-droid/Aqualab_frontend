@@ -34,7 +34,7 @@
 .products-filter__pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.625rem;
     margin-bottom: 2rem;
 }
 
@@ -42,11 +42,12 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.625rem 0.5rem 1rem;
     border-radius: var(--radius-full);
     font-size: 0.875rem;
-    font-weight: 500;
-    border: 1.5px solid var(--border);
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid var(--border);
     color: var(--text-secondary);
     background: var(--surface);
     cursor: pointer;
@@ -55,7 +56,7 @@
 }
 
 .products-filter__pill:hover {
-    border-color: var(--primary);
+    border-color: rgba(179, 0, 6, 0.35);
     color: var(--primary);
 }
 
@@ -63,18 +64,30 @@
     background: var(--primary);
     color: white;
     border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(179, 0, 6, 0.22);
+}
+
+.products-filter__pill--active:hover {
+    color: white;
+    border-color: var(--primary);
 }
 
 .products-filter__count {
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.1rem 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.4rem;
     border-radius: var(--radius-full);
-    background: rgba(0, 0, 0, 0.06);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
 }
 
 .products-filter__pill--active .products-filter__count {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.18);
     color: white;
 }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, PackageOpen } from 'lucide-react'
 import PageHero from '@/components/layout/PageHero'
@@ -13,13 +13,19 @@ import '@/components/ui/PartnerLogo.css'
 import './Products.css'
 
 const PER_PAGE = 6
-const DROPDOWN_THRESHOLD = 8
 
 function getGroupLabel(groupId, mainCategories) {
     return mainCategories.find((group) => group.id === groupId)?.label ?? groupId
 }
 
 const breadcrumbs = [{ label: 'Produits' }]
+
+function categoryHasEquipment(category) {
+    return (category.items ?? []).some((item) => {
+        const { name } = normalizeProductItem(item)
+        return name.trim().length > 0
+    })
+}
 
 function CatalogCard({ cat, showGroupBadge, groupLabel }) {
     return (
@@ -81,29 +87,36 @@ export default function ProductsPage({ categories: categoriesProp = [], mainCate
     const [selectedGroup, setSelectedGroup] = useState('all')
     const [page, setPage] = useState(1)
 
-    const categoryTabs = useMemo(
-        () => [{ id: 'all', label: 'Tous' }, ...mainCategories],
-        [mainCategories],
+    const visibleCategories = useMemo(
+        () => categoriesProp.filter(categoryHasEquipment),
+        [categoriesProp],
     )
 
     const tabsWithCounts = useMemo(
         () =>
-            categoryTabs.map((tab) => ({
-                ...tab,
-                count:
-                    tab.id === 'all'
-                        ? categoriesProp.length
-                        : categoriesProp.filter((c) => c.group === tab.id).length,
-            })),
-        [categoryTabs, categoriesProp],
+            [{ id: 'all', label: 'Tous' }, ...mainCategories]
+                .map((tab) => ({
+                    ...tab,
+                    count:
+                        tab.id === 'all'
+                            ? visibleCategories.length
+                            : visibleCategories.filter((c) => c.group === tab.id).length,
+                }))
+                .filter((tab) => tab.id === 'all' || tab.count > 0),
+        [mainCategories, visibleCategories],
     )
 
-    const useDropdown = tabsWithCounts.length > DROPDOWN_THRESHOLD
+    useEffect(() => {
+        if (selectedGroup !== 'all' && !tabsWithCounts.some((tab) => tab.id === selectedGroup)) {
+            setSelectedGroup('all')
+            setPage(1)
+        }
+    }, [selectedGroup, tabsWithCounts])
 
     const filtered = useMemo(() => {
-        if (selectedGroup === 'all') return categoriesProp
-        return categoriesProp.filter((category) => category.group === selectedGroup)
-    }, [categoriesProp, selectedGroup])
+        if (selectedGroup === 'all') return visibleCategories
+        return visibleCategories.filter((category) => category.group === selectedGroup)
+    }, [visibleCategories, selectedGroup])
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
     const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -128,45 +141,25 @@ export default function ProductsPage({ categories: categoriesProp = [], mainCate
                 <div className="container">
                     {tabsWithCounts.length > 1 && (
                         <FadeUp>
-                            {useDropdown ? (
-                                <div className="products-filter">
-                                    <label htmlFor="products-category-select" className="products-filter__label">
-                                        Catégorie principale
-                                    </label>
-                                    <select
-                                        id="products-category-select"
-                                        className="products-filter__select"
-                                        value={selectedGroup}
-                                        onChange={(e) => handleGroupChange(e.target.value)}
+                            <div
+                                className="products-filter__pills"
+                                role="tablist"
+                                aria-label="Filtrer par catégorie principale"
+                            >
+                                {tabsWithCounts.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={selectedGroup === tab.id}
+                                        className={`products-filter__pill ${selectedGroup === tab.id ? 'products-filter__pill--active' : ''}`}
+                                        onClick={() => handleGroupChange(tab.id)}
                                     >
-                                        {tabsWithCounts.map((tab) => (
-                                            <option key={tab.id} value={tab.id}>
-                                                {tab.label} ({tab.count})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            ) : (
-                                <div
-                                    className="products-filter__pills"
-                                    role="tablist"
-                                    aria-label="Filtrer par catégorie principale"
-                                >
-                                    {tabsWithCounts.map((tab) => (
-                                        <button
-                                            key={tab.id}
-                                            type="button"
-                                            role="tab"
-                                            aria-selected={selectedGroup === tab.id}
-                                            className={`products-filter__pill ${selectedGroup === tab.id ? 'products-filter__pill--active' : ''}`}
-                                            onClick={() => handleGroupChange(tab.id)}
-                                        >
-                                            {tab.label}
-                                            <span className="products-filter__count">{tab.count}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+                                        {tab.label}
+                                        <span className="products-filter__count">{tab.count}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </FadeUp>
                     )}
 
