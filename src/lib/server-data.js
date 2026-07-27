@@ -10,7 +10,7 @@ async function fetchApi(path) {
 
   try {
     const response = await fetch(`${base}${path}`, {
-      cache: 'no-store',
+      next: { revalidate: 300 },
       headers: { Accept: 'application/json' },
     })
 

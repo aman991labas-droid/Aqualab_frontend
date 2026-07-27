@@ -1,0 +1,331 @@
+/* ===== Bulle de bienvenue ===== */
+.chatbot-welcome-bubble {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  border-bottom-right-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--gray-200);
+  z-index: 9998;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Petite flèche vers le bouton */
+.chatbot-welcome-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid white;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+}
+
+.chatbot-welcome-bubble p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--gray-800);
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.chatbot-welcome-bubble p:hover {
+  color: var(--red-600);
+}
+
+.chatbot-welcome-close {
+  flex-shrink: 0;
+  background: var(--gray-100);
+  border: none;
+  border-radius: 9999px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--gray-500);
+  transition: background-color 0.2s, color 0.2s;
+  padding: 0;
+  margin-left: auto;
+}
+
+.chatbot-welcome-close:hover {
+  background-color: var(--red-100);
+  color: var(--red-600);
+}
+
+.chatbot-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: none;
+  background: transparent; /* ou var(--red-600) si tu veux un fond */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+
+
+.chatbot-window {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 380px;
+  max-width: calc(100vw - 3rem);
+  height: 550px;
+  max-height: calc(100vh - 3rem);
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-2xl);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.chatbot-header {
+  background: linear-gradient(135deg, var(--red-600), var(--red-800));
+  padding: 1rem;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+}
+
+.chatbot-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chatbot-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: var(--shadow-xl);
+}
+
+.chatbot-button:hover .chatbot-avatar {
+  transform: scale(1.30);
+  transition: transform 0.2s ease;
+
+}
+
+.chatbot-header-text h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+.chatbot-header-text p {
+  font-size: 0.75rem;
+  color: var(--red-100);
+  margin: 0;
+}
+
+.chatbot-close {
+  color: white;
+  background: transparent;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+  display: flex;
+}
+
+.chatbot-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chatbot-messages {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chatbot-message-row {
+  display: flex;
+}
+
+.chatbot-message-row.user {
+  justify-content: flex-end;
+}
+
+.chatbot-message-row.bot {
+  justify-content: flex-start;
+}
+
+.chatbot-message-content {
+  display: flex;
+  align-items: flex-start;
+  max-width: 85%;
+}
+
+.chatbot-message-row.user .chatbot-message-content {
+  flex-direction: row-reverse;
+}
+
+.chatbot-avatar {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatbot-message-row.user .chatbot-avatar {
+  background-color: var(--red-600);
+  margin-left: 0.5rem;
+  color: white;
+}
+
+.chatbot-message-row.bot .chatbot-avatar {
+  background-color: var(--gray-200);
+  margin-right: 0.5rem;
+  color: var(--gray-600);
+}
+
+.chatbot-bubble {
+  padding: 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.chatbot-message-row.user .chatbot-bubble {
+  background-color: var(--red-600);
+  color: white;
+  border-top-right-radius: 0.125rem;
+}
+
+.chatbot-message-row.bot .chatbot-bubble {
+  background-color: white;
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
+  border-top-left-radius: 0.125rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.chatbot-message-row.bot .chatbot-bubble.error {
+  background-color: var(--red-100);
+  color: var(--red-700);
+  border-color: transparent;
+}
+
+.chatbot-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gray-500);
+}
+
+.chatbot-loading span {
+  font-size: 0.75rem;
+}
+
+.chatbot-input-area {
+  padding: 1rem;
+  background-color: white;
+  border-top: 1px solid var(--gray-100);
+}
+
+.chatbot-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chatbot-input {
+  flex: 1;
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-800);
+  font-size: 0.875rem;
+  border-radius: 9999px;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chatbot-input:focus {
+  border-color: var(--red-500);
+  box-shadow: 0 0 0 2px rgba(224, 0, 8, 0.2);
+}
+
+.chatbot-send {
+  background-color: var(--red-600);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatbot-send:hover:not(:disabled) {
+  background-color: var(--red-700);
+}
+
+.chatbot-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chatbot-send-icon {
+  transition: transform 0.2s;
+}
+
+.chatbot-send-icon.active {
+  transform: translateX(2px);
+}
+
+
+.markdown-content {
+  font-size: 0.875rem;
+}
+.markdown-content p {
+  margin-bottom: 0.5rem;
+}
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-content ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-content strong {
+  font-weight: 600;
+}
