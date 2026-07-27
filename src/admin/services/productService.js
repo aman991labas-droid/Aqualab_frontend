@@ -9,6 +9,30 @@ let tabs = initialProductTabs.map((tab) => ({
   categories: tab.categories.map((cat) => ({ ...cat, items: [...cat.items] })),
 }))
 
+function normalizeItemImages(item, itemName = '') {
+  if (Array.isArray(item?.images) && item.images.length > 0) {
+    return item.images
+      .map((img) => {
+        if (typeof img === 'string') {
+          return { url: img, alt: itemName || null }
+        }
+        const url = img?.url ?? img?.image ?? ''
+        if (!url) return null
+        return {
+          url,
+          alt: (img?.alt ?? img?.imageAlt ?? itemName) || null,
+        }
+      })
+      .filter(Boolean)
+  }
+
+  if (item?.image) {
+    return [{ url: item.image, alt: (item.imageAlt ?? itemName) || null }]
+  }
+
+  return []
+}
+
 function normalizeItems(items = []) {
   return items
     .map((item) => {
@@ -17,10 +41,11 @@ function normalizeItems(items = []) {
       const name = item?.name?.trim()
       if (!name) return null
 
+      const images = normalizeItemImages(item, name)
+
       return {
         name,
-        image: item.image || null,
-        imageAlt: item.imageAlt || null,
+        images,
         details: item.details?.trim() || null,
       }
     })

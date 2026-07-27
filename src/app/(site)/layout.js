@@ -1,6 +1,7 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import SkipToContent from '@/components/layout/SkipToContent'
+import FloatingChatbot from '@/components/chat/FloatingChatbot'
 import { getAllCategories } from '@/lib/server-data'
 
 export const dynamic = 'force-dynamic'
@@ -16,6 +17,7 @@ export default async function SiteLayout({ children }) {
                 {children}
             </main>
             <Footer productCategories={categories} />
+            <FloatingChatbot />
         </>
     )
 }

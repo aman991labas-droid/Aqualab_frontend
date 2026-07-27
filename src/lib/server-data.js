@@ -1,4 +1,10 @@
 import 'server-only'
+import {
+  productCategories as staticProductCategories,
+  productGroups as staticProductGroups,
+  getCategoryBySlug as getStaticCategoryBySlug,
+} from '@/data/products'
+import { articles as staticArticles } from '@/data/articles'
 
 function getApiBase() {
   return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? ''
@@ -26,13 +32,13 @@ async function fetchApi(path) {
 export async function getAllCategories() {
   const data = await fetchApi('/api/categories')
   if (Array.isArray(data) && data.length > 0) return data
-  return []
+  return staticProductCategories
 }
 
 export async function getMainCategories() {
   const data = await fetchApi('/api/main-categories')
   if (Array.isArray(data) && data.length > 0) return data
-  return []
+  return staticProductGroups
 }
 
 export async function getPartners() {
@@ -44,7 +50,7 @@ export async function getPartners() {
 export async function getCategoryBySlug(slug) {
   const data = await fetchApi(`/api/categories/${slug}`)
   if (data?.slug) return data
-  return null
+  return getStaticCategoryBySlug(slug)
 }
 
 export async function getCategorySlugs() {
@@ -60,13 +66,13 @@ export function getCategoriesByGroup(groupId, categories) {
 export async function getAllArticles() {
   const data = await fetchApi('/api/articles')
   if (Array.isArray(data) && data.length > 0) return data
-  return []
+  return staticArticles
 }
 
 export async function getArticleBySlug(slug) {
   const data = await fetchApi(`/api/articles/${slug}`)
   if (data?.slug) return data
-  return null
+  return staticArticles.find((article) => article.slug === slug) ?? null
 }
 
 export async function getArticleSlugs() {

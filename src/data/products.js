@@ -6,8 +6,21 @@
  */
 
 import { buildCanonicalPath } from './seo'
+import { normalizeProductItem as normalizeItem } from '@/lib/products'
 
 export { SITE_URL } from './seo'
+
+/** @deprecated Prefer `@/lib/products` — re-export for static catalogue */
+export function normalizeProductItem(item) {
+    const normalized = normalizeItem(item)
+    return {
+        name: normalized.name,
+        image: normalized.image,
+        imageAlt: normalized.imageAlt,
+        images: normalized.images,
+        details: normalized.details,
+    }
+}
 
 /** Logos partenaires par slug catégorie — Laravel: champ partner_logo en base */
 export const PARTNER_LOGOS = {
@@ -19,22 +32,6 @@ export const PARTNER_LOGOS = {
     'filtration-air': '/images/partners/fetefilter_logo.png',
     'solutions-refroidissement': '/images/partners/bac_logo.png',
     'mesures-industrielles': '/images/partners/vaisala_logo.png',
-}
-
-/**
- * Normalise un item produit.
- * Accepte une string OU { name, image? } — Laravel: relation products avec image URL.
- */
-export function normalizeProductItem(item) {
-    if (typeof item === 'string') {
-        return { name: item, image: null, imageAlt: null }
-    }
-
-    return {
-        name: item.name ?? '',
-        image: item.image ?? null,
-        imageAlt: item.imageAlt ?? item.name ?? null,
-    }
 }
 
 /** Chemin image catégorie par convention — remplacer par category.image quand ajouté */
