@@ -34,10 +34,12 @@ export default function PartnersPage() {
   const [items, setItems] = useState([])
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState({ key: 'sortOrder', dir: 'asc' })
+  // const [sort, setSort] = useState({ key: 'sortOrder', dir: 'asc' })
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const [deletingMultiple, setDeletingMultiple] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
@@ -59,27 +61,39 @@ export default function PartnersPage() {
   }, [])
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase()
-    const list = items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.specialty.toLowerCase().includes(q)
-    )
-    return list.sort((a, b) => {
-      const av = a[sort.key]
-      const bv = b[sort.key]
-      if (av < bv) return sort.dir === 'asc' ? -1 : 1
-      if (av > bv) return sort.dir === 'asc' ? 1 : -1
-      return 0
-    })
-  }, [items, query, sort])
+  const q = query.toLowerCase()
+  const list = items.filter(
+    (i) => i.name.toLowerCase().includes(q)
+  )
+  return list.sort((a, b) => {
+    if (a.label < b.label) return -1
+    if (a.label > b.label) return 1
+    return 0
+  })
+}, [items, query])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds(prev => [...prev, id])
+    else setSelectedIds(prev => prev.filter(i => i !== id))
+  }
+
+  const onSelectAll = (checked, currentRows) => {
+    if (checked) {
+      const newIds = currentRows.map(r => r.id).filter(id => !selectedIds.includes(id))
+      setSelectedIds(prev => [...prev, ...newIds])
+    } else {
+      const rowIds = currentRows.map(r => r.id)
+      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
+    }
+  }
+
   const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const onSort = (key) => {
-    setSort((prev) => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }))
-  }
+  // const onSort = (key) => {
+  //   setSort((prev) => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }))
+  // }
 
   const validate = () => {
     const next = {}
@@ -146,10 +160,22 @@ export default function PartnersPage() {
   }
 
   const deleteItem = async () => {
-    if (!deleting) return
+    if (!deleting && !deletingMultiple) return
     setSubmitting(true)
     try {
-      await partnerService.deletePartner(deleting.id)
+      if (deletingMultiple) {
+        for (const id of selectedIds) {
+          await partnerService.deletePartner(id)
+        }
+        Toast.success('Éléments supprimés.')
+        setDeletingMultiple(false)
+        setSelectedIds([])
+      } else {
+        await partnerService.deletePartner(deleting.id)
+        Toast.success('Élément supprimé.')
+        setDeleting(null)
+      }
+      load()
       Toast.success('Partenaire supprimé.')
       setDeleting(null)
       load()
@@ -176,11 +202,24 @@ export default function PartnersPage() {
         <SearchBar value={query} onChange={setQuery} placeholder="Rechercher par nom ou spécialité..." />
       </FilterBar>
 
+      
+      {selectedIds.length > 0 && (
+        <div className="admin-actions" style={{ marginBottom: '1rem', justifyContent: 'flex-start' }}>
+          <button className="btn btn-primary" onClick={() => setDeletingMultiple(true)}>
+            Supprimer la sélection ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <EmptyState title="Aucun partenaire" />
       ) : (
         <>
           <DataTable
+            selectable
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onSelectAll={onSelectAll}
             columns={[
               {
                 key: 'logo',
@@ -192,9 +231,9 @@ export default function PartnersPage() {
                     '—'
                   ),
               },
-              { key: 'name', label: 'Nom', sortable: true },
-              { key: 'specialty', label: 'Spécialité', sortable: true },
-              { key: 'sortOrder', label: 'Ordre', sortable: true },
+              { key: 'name', label: 'Nom',  },
+              { key: 'specialty', label: 'Spécialité',  },
+              // { key: 'sortOrder', label: 'Ordre',  },
               {
                 key: 'isActive',
                 label: 'Actif',
@@ -202,17 +241,17 @@ export default function PartnersPage() {
               },
             ]}
             rows={rows}
-            sortKey={sort.key}
-            sortDir={sort.dir}
-            onSort={onSort}
+            // sortKey={sort.key}
+            // sortDir={sort.dir}
+            // onSort={onSort}
             actions={(row) => (
               <>
                 <button className="btn btn-sm btn-outline-dark" onClick={() => openEdit(row)}>
                   Modifier
                 </button>
-                <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
+                {/* <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
                   Supprimer
-                </button>
+                </button> */}
               </>
             )}
           />
@@ -248,13 +287,13 @@ export default function PartnersPage() {
             onChange={(e) => setForm((p) => ({ ...p, url: e.target.value }))}
             placeholder="https://..."
           />
-          <Input
+          {/* <Input
             label="Ordre d'affichage"
             type="number"
             min={0}
             value={form.sortOrder}
             onChange={(e) => setForm((p) => ({ ...p, sortOrder: e.target.value }))}
-          />
+          /> */}
           <FormFileField
             label="Logo"
             accept="image/*"
@@ -290,10 +329,10 @@ export default function PartnersPage() {
       </Modal>
 
       <ConfirmationDialog
-        open={!!deleting}
-        title="Supprimer ce partenaire ?"
-        message={deleting ? `Cette action supprimera "${deleting.name}".` : ''}
-        onCancel={() => setDeleting(null)}
+        open={!!deleting || deletingMultiple}
+        title={deletingMultiple ? "Supprimer la sélection ?" : "Supprimer ce partenaire ?"}
+        message={deletingMultiple ? `Cette action supprimera ${selectedIds.length} élément(s).` : (deleting ? `Cette action supprimera "${deleting.name}".` : '')}
+        onCancel={() => { setDeleting(null); setDeletingMultiple(false); }}
         onConfirm={deleteItem}
         loading={submitting}
       />

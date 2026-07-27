@@ -33,6 +33,8 @@ export default function ApplicationsPage() {
   const [page, setPage] = useState(1)
   const [details, setDetails] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const [deletingMultiple, setDeletingMultiple] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [actionLoading, setActionLoading] = useState(false)
 
   const load = async () => {
@@ -63,6 +65,23 @@ export default function ApplicationsPage() {
     })
   }, [items, query, status])
 
+  
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds(prev => [...prev, id])
+    else setSelectedIds(prev => prev.filter(i => i !== id))
+  }
+
+  const onSelectAll = (checked, currentRows) => {
+    if (checked) {
+      const newIds = currentRows.map(r => r.id).filter(id => !selectedIds.includes(id))
+      setSelectedIds(prev => [...prev, ...newIds])
+    } else {
+      const rowIds = currentRows.map(r => r.id)
+      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
+    }
+  }
+
+
   const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
@@ -78,10 +97,22 @@ export default function ApplicationsPage() {
   }
 
   const remove = async () => {
-    if (!deleting) return
+    if (!deleting && !deletingMultiple) return
     setActionLoading(true)
     try {
-      await applicationService.deleteApplication(deleting.id)
+      if (deletingMultiple) {
+        for (const id of selectedIds) {
+          await applicationService.deleteApplication(id)
+        }
+        Toast.success('Éléments supprimés.')
+        setDeletingMultiple(false)
+        setSelectedIds([])
+      } else {
+        await applicationService.deleteApplication(deleting.id)
+        Toast.success('Élément supprimé.')
+        setDeleting(null)
+      }
+      load()
       Toast.success('Candidature supprimée.')
       setDeleting(null)
       load()
@@ -107,11 +138,24 @@ export default function ApplicationsPage() {
           options={[{ value: 'all', label: 'Tous statuts' }, ...statusOptions]}
         />
       </FilterBar>
+      
+      {selectedIds.length > 0 && (
+        <div className="admin-actions" style={{ marginBottom: '1rem', justifyContent: 'flex-start' }}>
+          <button className="btn btn-primary" onClick={() => setDeletingMultiple(true)}>
+            Supprimer la sélection ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <EmptyState title="Aucune candidature" />
       ) : (
         <>
           <DataTable
+            selectable
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onSelectAll={onSelectAll}
             columns={[
               { key: 'name', label: 'name' },
               { key: 'email', label: 'email' },
@@ -146,9 +190,9 @@ export default function ApplicationsPage() {
                     Télécharger CV
                   </a>
                 )}
-                <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
+                {/* <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
                   Supprimer
-                </button>
+                </button> */}
               </>
             )}
           />
@@ -173,10 +217,10 @@ export default function ApplicationsPage() {
       </Modal>
 
       <ConfirmationDialog
-        open={!!deleting}
-        title="Supprimer cette candidature ?"
-        message={deleting ? deleting.name : ''}
-        onCancel={() => setDeleting(null)}
+        open={!!deleting || deletingMultiple}
+        title={deletingMultiple ? "Supprimer la sélection ?" : "Supprimer cette candidature ?"}
+        message={deletingMultiple ? `Cette action supprimera ${selectedIds.length} élément(s).` : (deleting ? deleting.name : '')}
+        onCancel={() => { setDeleting(null); setDeletingMultiple(false); }}
         onConfirm={remove}
         loading={actionLoading}
       />

@@ -2,14 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Shapes, Boxes, Layers, Newspaper, BriefcaseBusiness, Mail, MessageSquare, LogOut, X, Handshake } from 'lucide-react'
+import { LayoutDashboard, Shapes, Boxes, Layers, Newspaper, BriefcaseBusiness, Mail, MessageSquare, LogOut, X, Handshake, Home } from 'lucide-react'
 import { useAuth } from '@/admin/context/AuthContext'
 import { isNavLinkActive } from '@/lib/nav-active'
+import "./Sidebar.css"
 
 const links = [
+  { href: '/', label: 'acceuil', icon: Home },
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/categories', label: 'Catégories blog', icon: Shapes },
   { href: '/admin/main-categories', label: 'Catégories principales', icon: Layers },
+  { href: '/admin/product-categories', label: 'Catégories produits', icon: Layers },
   { href: '/admin/partners', label: 'Partenaires exclusifs', icon: Handshake },
   { href: '/admin/products', label: 'Produits', icon: Boxes },
   { href: '/admin/news', label: 'Actualites', icon: Newspaper },

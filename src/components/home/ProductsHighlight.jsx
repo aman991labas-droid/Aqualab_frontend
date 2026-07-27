@@ -9,7 +9,7 @@ import { getCategoryPath } from '@/lib/products'
 import './ProductsHighlight.css'
 
 function getPartnerName(partner = '') {
-    return partner.split('—')[0].trim()
+    return partner?.split('—')[0].trim() ?? ""
 }
 
 function PartnerIcon({ logo, partner }) {
@@ -82,9 +82,9 @@ export default function ProductsHighlight({ categories = [] }) {
                                 <Link href={getCategoryPath(category.slug)} className="product-card" aria-label={`En savoir plus sur ${category.title}`}>
                                     <CategoryImage src={category.image} alt={category.title} />
                                     <div className="product-card__body">
-                                        <div className="product-card__logo-wrap" aria-hidden="true">
+                                        {category.partner && <div className="product-card__logo-wrap" aria-hidden="true">
                                             <PartnerIcon logo={category.partnerLogo} partner={partner} />
-                                        </div>
+                                        </div>}
                                         {!category.partnerLogo && partner ? (
                                             <span className="product-card__partner badge badge-red">{partner}</span>
                                         ) : null}

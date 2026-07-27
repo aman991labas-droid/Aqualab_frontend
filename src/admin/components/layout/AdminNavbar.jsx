@@ -23,9 +23,9 @@ export default function AdminNavbar({ onMenuClick }) {
       </button>
       <div className="admin-topbar__right">
         <ThemeToggle />
-        <button className="admin-icon-btn" aria-label="Notifications">
+        {/* <button className="admin-icon-btn" aria-label="Notifications">
           <Bell size={18} />
-        </button>
+        </button> */}
         <div className="admin-profile">
           <button type="button" className="admin-profile__btn" onClick={() => setOpen((v) => !v)}>
             {user?.name || 'Admin'}
