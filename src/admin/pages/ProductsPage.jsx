@@ -19,7 +19,8 @@ import EmptyState from '../components/ui/EmptyState'
 import ErrorState from '../components/ui/ErrorState'
 import { Toast } from '../components/ui/Toast'
 import { compressImageFile } from '../utils/compressImage'
-import { categories } from '@/data/articles'
+import { normalizeProductItem } from '@/lib/products'
+import FileUpload from '../components/ui/FileUpload'
 
 const PAGE_SIZE = 8
 
@@ -47,7 +48,7 @@ const emptyForm = {
   partner: '', 
   partnerLogo: '', 
   partnerLogoAlt: '', 
-  items: [{ name: '', image: '', imageAlt: '', details: '' }] 
+  items: [{ name: '', images: [], details: '' }]
 }
 
 export default function ProductsPage() {
@@ -107,9 +108,14 @@ export default function ProductsPage() {
     const groupImageAlt = groupImage && title ? `Présentation visuelle de la gamme ${title}` : ''
     const partnerLogoAlt = partnerLogo && partner ? `Logo officiel de la marque ${partner}` : ''
 
-    const optimizedItems = items.map(item => ({
+    const optimizedItems = items.map((item) => ({
       ...item,
-      imageAlt: item.image && item.name ? `Photo de l'appareil ${item.name}` : ''
+      images: (item.images || []).map((img, i) => ({
+        ...img,
+        alt: img.alt || (item.name
+          ? `Photo de l'appareil ${item.name}${(item.images?.length ?? 0) > 1 ? ` (${i + 1})` : ''}`
+          : ''),
+      })),
     }))
 
     return {
@@ -189,20 +195,39 @@ export default function ProductsPage() {
     }
   }
 
-  const handleItemImageUpload = async (index, file) => {
-    if (file) {
-      try {
-        const base64 = await fileToBase64(file, { maxWidth: 800, maxHeight: 800, quality: 0.82 })
-        setForm(prev => {
-          const updatedItems = [...prev.items]
-          updatedItems[index]['image'] = base64
-          const next = { ...prev, items: updatedItems }
-          return updateSEOData(next)
-        })
-      } catch {
-        Toast.error("Erreur lors du chargement de l'image.")
-      }
+  const handleItemImagesUpload = async (index, fileList) => {
+    if (!fileList?.length) return
+    try {
+      const files = Array.from(fileList)
+      const base64List = await Promise.all(
+        files.map((file) => fileToBase64(file, { maxWidth: 800, maxHeight: 800, quality: 0.82 })),
+      )
+      setForm((prev) => {
+        const updatedItems = [...prev.items]
+        const current = updatedItems[index]
+        updatedItems[index] = {
+          ...current,
+          images: [
+            ...(current.images || []),
+            ...base64List.map((url) => ({ url, alt: '' })),
+          ],
+        }
+        return updateSEOData({ ...prev, items: updatedItems })
+      })
+    } catch {
+      Toast.error("Erreur lors du chargement de l'image.")
     }
+  }
+
+  const removeItemImage = (itemIndex, imageIndex) => {
+    setForm((prev) => {
+      const updatedItems = [...prev.items]
+      updatedItems[itemIndex] = {
+        ...updatedItems[itemIndex],
+        images: (updatedItems[itemIndex].images || []).filter((_, i) => i !== imageIndex),
+      }
+      return updateSEOData({ ...prev, items: updatedItems })
+    })
   }
 
   const validate = () => {
@@ -242,16 +267,22 @@ export default function ProductsPage() {
       partner: row.partner,
       partnerLogo: row.partnerLogo || '',
       partnerLogoAlt: row.partnerLogoAlt || '',
-      items: row.items.map(item => typeof item === 'string'
-        ? { name: item, image: '', imageAlt: '', details: '' }
-        : { name: item.name ?? '', image: item.image ?? '', imageAlt: item.imageAlt ?? '', details: item.details ?? '' }),
+      items: row.items.map((item) => {
+        if (typeof item === 'string') return { name: item, images: [], details: '' }
+        const normalized = normalizeProductItem(item)
+        return {
+          name: normalized.name ?? '',
+          images: normalized.images.map((img) => ({ url: img.url, alt: img.alt ?? '' })),
+          details: normalized.details ?? '',
+        }
+      }),
     })
     setErrors({})
     setModalOpen(true)
   }
 
   const addItemField = () => {
-    setForm(prev => ({ ...prev, items: [...prev.items, { name: '', image: '', imageAlt: '', details: '' }] }))
+    setForm(prev => ({ ...prev, items: [...prev.items, { name: '', images: [], details: '' }] }))
   }
 
   const removeItemField = (index) => {
@@ -524,22 +555,47 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                <div className="admin-grid-2">
-                  <Input
-                    label="Nom du modèle"
-                    required
-                    placeholder="Ex: Leica M60"
-                    value={item.name}
-                    onChange={(e) => handleItemFieldChange(index, 'name', e.target.value)}
-                    error={errors.items?.[index]?.name}
-                  />
-                  <FormFileField
-                    label="Photo du modèle"
+                <Input
+                  label="Nom du modèle"
+                  required
+                  placeholder="Ex: Leica M60"
+                  value={item.name}
+                  onChange={(e) => handleItemFieldChange(index, 'name', e.target.value)}
+                  error={errors.items?.[index]?.name}
+                />
+
+                <div className="form-group">
+                  <label className="form-label">Photos du modèle</label>
+                  <FileUpload
+                    label="Ajouter une ou plusieurs photos"
                     accept="image/*"
-                    onChange={(e) => handleItemImageUpload(index, e.target.files?.[0])}
-                    preview={item.image}
-                    previewClassName="admin-image-preview--model"
+                    multiple
+                    onChange={(e) => {
+                      handleItemImagesUpload(index, e.target.files)
+                      e.target.value = ''
+                    }}
                   />
+                  {(item.images?.length ?? 0) > 0 && (
+                    <div className="admin-item-images">
+                      {item.images.map((img, imageIndex) => (
+                        <div key={`${img.url}-${imageIndex}`} className="admin-item-images__item">
+                          <img
+                            src={img.url}
+                            alt={img.alt || `Photo ${imageIndex + 1}`}
+                            className="admin-item-images__preview"
+                          />
+                          <button
+                            type="button"
+                            className="admin-item-images__remove"
+                            onClick={() => removeItemImage(index, imageIndex)}
+                            aria-label={`Supprimer la photo ${imageIndex + 1}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <Textarea

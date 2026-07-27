@@ -13,6 +13,9 @@ import {
 } from '@/lib/server-data'
 import ProductCategoryPage from '@/components/products/ProductCategoryPage'
 
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+
 export async function generateStaticParams() {
   return getCategorySlugs()
 }

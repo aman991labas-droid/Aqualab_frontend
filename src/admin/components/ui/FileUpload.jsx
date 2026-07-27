@@ -3,7 +3,7 @@
 import { useRef } from 'react'
 import { UploadCloud } from 'lucide-react'
 
-export default function FileUpload({ label = 'Choisir un fichier', onChange, accept = '*' }) {
+export default function FileUpload({ label = 'Choisir un fichier', onChange, accept = '*', multiple = false }) {
   const inputRef = useRef(null)
 
   const openPicker = () => inputRef.current?.click()
@@ -27,6 +27,7 @@ export default function FileUpload({ label = 'Choisir un fichier', onChange, acc
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         onChange={onChange}
         className="admin-file-upload__input"
         tabIndex={-1}
