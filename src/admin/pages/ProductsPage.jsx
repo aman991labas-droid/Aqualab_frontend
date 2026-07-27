@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Sparkles } from 'lucide-react'
 import { productService } from '../services/productService'
+import { productCategoryService } from '../services/productCategoryService'
 import DataTable from '../components/ui/DataTable'
 import SearchBar from '../components/ui/SearchBar'
 import Select from '../components/ui/Select'
@@ -52,6 +53,7 @@ const emptyForm = {
 export default function ProductsPage() {
   const [tabs, setTabs] = useState([])
   const [items, setItems] = useState([])
+  const [productCategories, setProductCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
@@ -60,6 +62,8 @@ export default function ProductsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const [deletingMultiple, setDeletingMultiple] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
@@ -69,9 +73,13 @@ export default function ProductsPage() {
     if (!silent) setLoading(true)
     setError('')
     try {
-      const { tabs: tabsData, groups } = await productService.getCategoriesBundle()
+      const [{ tabs: tabsData, groups }, categoriesData] = await Promise.all([
+        productService.getCategoriesBundle(),
+        productCategoryService.getProductCategories()
+      ])
       setTabs(tabsData)
       setItems(groups)
+      setProductCategories(categoriesData)
     } catch {
       setError('Erreur de chargement du catalogue produits.')
     } finally {
@@ -142,6 +150,21 @@ export default function ProductsPage() {
       return byTab && byText
     })
   }, [items, query, tabFilter])
+
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds(prev => [...prev, id])
+    else setSelectedIds(prev => prev.filter(i => i !== id))
+  }
+
+  const onSelectAll = (checked, currentRows) => {
+    if (checked) {
+      const newIds = currentRows.map(r => r.id || `${r.tabId}-${r.categoryIndex}`).filter(id => !selectedIds.includes(id))
+      setSelectedIds(prev => [...prev, ...newIds])
+    } else {
+      const rowIds = currentRows.map(r => r.id || `${r.tabId}-${r.categoryIndex}`)
+      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
+    }
+  }
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -309,12 +332,23 @@ export default function ProductsPage() {
   }
 
   const remove = async () => {
-    if (!deleting) return
+    if (!deleting && !deletingMultiple) return
     setSubmitting(true)
     try {
-      await productService.deleteCategoryGroup(deleting.tabId, deleting.categoryIndex, deleting.slug)
-      Toast.success('Catégorie produit supprimée.')
-      setDeleting(null)
+      if (deletingMultiple) {
+        const allItems = items.map(r => ({ ...r, id: `${r.tabId}-${r.categoryIndex}` }))
+        for (const id of selectedIds) {
+          const row = allItems.find(r => r.id === id)
+          if (row) await productService.deleteCategoryGroup(row.tabId, row.categoryIndex, row.slug)
+        }
+        Toast.success('Catégories produits supprimées.')
+        setDeletingMultiple(false)
+        setSelectedIds([])
+      } else {
+        await productService.deleteCategoryGroup(deleting.tabId, deleting.categoryIndex, deleting.slug)
+        Toast.success('Catégorie produit supprimée.')
+        setDeleting(null)
+      }
       await load({ silent: true })
     } catch (err) {
       Toast.error(err.message)
@@ -329,9 +363,9 @@ export default function ProductsPage() {
   return (
     <section className="admin-page">
       <div className="admin-page__head">
-        <h1>Catégories produits</h1>
+        <h1>Les produits</h1>
         <button className="btn btn-primary" onClick={startCreate}>
-          Ajouter une catégorie produit
+          Ajouter un produit
         </button>
       </div>
     
@@ -347,11 +381,23 @@ export default function ProductsPage() {
         />
       </FilterBar>
 
+      {selectedIds.length > 0 && (
+        <div className="admin-actions" style={{ marginBottom: '1rem', justifyContent: 'flex-start' }}>
+          <button className="btn btn-primary" onClick={() => setDeletingMultiple(true)}>
+            Supprimer la sélection ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <EmptyState title="Aucune catégorie produit" />
       ) : (
         <>
           <DataTable
+            selectable
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onSelectAll={onSelectAll}
             columns={[
               { key: 'tabLabel', label: 'Catégorie principale' },
               { 
@@ -388,9 +434,9 @@ export default function ProductsPage() {
                 <button className="btn btn-sm btn-outline-dark" onClick={() => startEdit(row)}>
                   Modifier
                 </button>
-                <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
+                {/* <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
                   Supprimer
-                </button>
+                </button> */}
               </>
             )}
           />
@@ -408,13 +454,15 @@ export default function ProductsPage() {
             options={tabs.map((t) => ({ value: t.id, label: t.label }))}
           />
           
-          <Input
+          <Select
             label="Nom de la catégorie produit"
             required
-            placeholder="Ex: Stéréomicroscopes Série M"
             value={form.title}
             onChange={(e) => handleFieldChange('title', e.target.value)}
-            error={errors.title}
+            options={[
+              { value: '', label: 'Sélectionner une catégorie produit...' },
+              ...productCategories.map(pc => ({ value: pc.name, label: pc.name }))
+            ]}
           />
 
           <FormFileField
@@ -525,10 +573,10 @@ export default function ProductsPage() {
       </Modal>
 
       <ConfirmationDialog
-        open={!!deleting}
-        title="Supprimer cette catégorie produit ?"
-        message={deleting ? `${deleting.title}` : ''}
-        onCancel={() => setDeleting(null)}
+        open={!!deleting || deletingMultiple}
+        title={deletingMultiple ? "Supprimer la sélection ?" : "Supprimer cette catégorie produit ?"}
+        message={deletingMultiple ? `Cette action supprimera ${selectedIds.length} catégorie(s).` : (deleting ? `${deleting.title}` : '')}
+        onCancel={() => { setDeleting(null); setDeletingMultiple(false); }}
         onConfirm={remove}
         loading={submitting}
       />

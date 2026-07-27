@@ -71,6 +71,8 @@ export default function NewsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const [deletingMultiple, setDeletingMultiple] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [previewOpen, setPreviewOpen] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [previewImg, setPreviewImg] = useState('')
@@ -113,6 +115,23 @@ export default function NewsPage() {
       return byText && byCategory && byFeatured
     })
   }, [items, query, categoryFilter, featuredFilter])
+
+  
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds(prev => [...prev, id])
+    else setSelectedIds(prev => prev.filter(i => i !== id))
+  }
+
+  const onSelectAll = (checked, currentRows) => {
+    if (checked) {
+      const newIds = currentRows.map(r => r.id).filter(id => !selectedIds.includes(id))
+      setSelectedIds(prev => [...prev, ...newIds])
+    } else {
+      const rowIds = currentRows.map(r => r.id)
+      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
+    }
+  }
+
 
   const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
@@ -210,10 +229,22 @@ export default function NewsPage() {
   }
 
   const remove = async () => {
-    if (!deleting) return
+    if (!deleting && !deletingMultiple) return
     setSubmitting(true)
     try {
-      await newsService.deleteNews(deleting.id)
+      if (deletingMultiple) {
+        for (const id of selectedIds) {
+          await newsService.deleteNews(id)
+        }
+        Toast.success('Éléments supprimés.')
+        setDeletingMultiple(false)
+        setSelectedIds([])
+      } else {
+        await newsService.deleteNews(deleting.id)
+        Toast.success('Élément supprimé.')
+        setDeleting(null)
+      }
+      load()
       Toast.success('Article supprimé.')
       setDeleting(null)
       load()
@@ -257,11 +288,24 @@ export default function NewsPage() {
         />
       </div>
 
+      
+      {selectedIds.length > 0 && (
+        <div className="admin-actions" style={{ marginBottom: '1rem', justifyContent: 'flex-start' }}>
+          <button className="btn btn-primary" onClick={() => setDeletingMultiple(true)}>
+            Supprimer la sélection ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <EmptyState title="Aucun article" />
       ) : (
         <>
           <DataTable
+            selectable
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onSelectAll={onSelectAll}
             columns={[
               { key: 'title', label: 'title' },
               { key: 'slug', label: 'slug' },
@@ -283,9 +327,9 @@ export default function NewsPage() {
                 <button className="btn btn-sm btn-outline-dark" onClick={() => openEdit(row)}>
                   Modifier
                 </button>
-                <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
+                {/* <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
                   Supprimer
-                </button>
+                </button> */}
               </>
             )}
           />
@@ -393,10 +437,10 @@ export default function NewsPage() {
       </Modal>
 
       <ConfirmationDialog
-        open={!!deleting}
-        title="Supprimer cet article ?"
-        message={deleting ? deleting.title : ''}
-        onCancel={() => setDeleting(null)}
+        open={!!deleting || deletingMultiple}
+        title={deletingMultiple ? "Supprimer la sélection ?" : "Supprimer cet article ?"}
+        message={deletingMultiple ? `Cette action supprimera ${selectedIds.length} élément(s).` : (deleting ? deleting.title : '')}
+        onCancel={() => { setDeleting(null); setDeletingMultiple(false); }}
         onConfirm={remove}
         loading={submitting}
       />

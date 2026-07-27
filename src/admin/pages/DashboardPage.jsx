@@ -1,12 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { categoryService } from '../services/categoryService'
-import { productService } from '../services/productService'
-import { newsService } from '../services/newsService'
-import { applicationService } from '../services/applicationService'
-import { contactService } from '../services/contactService'
-import { newsletterService } from '../services/newsletterService'
+import { adminFetch } from '../../services/api/adminClient'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import ErrorState from '../components/ui/ErrorState'
 
@@ -37,21 +32,14 @@ export default function DashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const [categories, productGroups, articles, applications, contactMessages, newsletterResult] = await Promise.all([
-        categoryService.getCategories(),
-        productService.getCategoryGroups(),
-        newsService.getNews(),
-        applicationService.getApplications(),
-        contactService.getMessages(),
-        newsletterService.getSubscribers({ perPage: 1 }),
-      ])
+      const dashboardData = await adminFetch('/api/admin/dashboard')
       setData({
-        categories,
-        productGroups,
-        articles,
-        applications,
-        contactMessages,
-        newsletterStats: newsletterResult.stats || { total: 0, active: 0, unsubscribed: 0 },
+        categories: dashboardData.recent.articles, // only for the count in stats, but stats are precomputed now
+        productGroups: dashboardData.recent.productGroups,
+        articles: dashboardData.recent.articles,
+        applications: dashboardData.recent.applications,
+        contactMessages: dashboardData.recent.contactMessages,
+        stats: dashboardData.stats,
       })
     } catch {
       setError('Chargement du dashboard impossible.')
@@ -71,12 +59,12 @@ export default function DashboardPage() {
     <section className="admin-page">
       <h1>Dashboard</h1>
       <div className="admin-stats-grid">
-        <StatCard label="Groupes produits" value={data.productGroups.length} />
-        <StatCard label="Catégories blog" value={data.categories.length} />
-        <StatCard label="Articles" value={data.articles.length} />
-        <StatCard label="Abonnés newsletter" value={data.newsletterStats.active} />
-        <StatCard label="Messages contact" value={data.contactMessages.filter((m) => !m.isRead).length} />
-        <StatCard label="Candidatures" value={data.applications.length} />
+        <StatCard label="Groupes produits" value={data.stats?.productGroups ?? 0} />
+        <StatCard label="Catégories blog" value={data.stats?.blogCategories ?? 0} />
+        <StatCard label="Articles" value={data.stats?.articles ?? 0} />
+        <StatCard label="Abonnés newsletter" value={data.stats?.newsletterActive ?? 0} />
+        <StatCard label="Messages contact" value={data.stats?.contactMessages ?? 0} />
+        <StatCard label="Candidatures" value={data.stats?.applications ?? 0} />
       </div>
 
       <div className="admin-panels-grid">

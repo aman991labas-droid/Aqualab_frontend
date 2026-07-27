@@ -18,7 +18,15 @@ export const newsletterService = {
     return adminFetchFull(`/api/admin/newsletter/subscribers${suffix}`)
   },
 
+  async reactivateSubscriber(id) {
+    return adminFetch(`/api/admin/newsletter/subscribers/${id}/reactivate`, { method: 'PATCH' })
+  },
+
   async deactivateSubscriber(id) {
+    return adminFetch(`/api/admin/newsletter/subscribers/${id}/deactivate`, { method: 'PATCH' })
+  },
+
+  async deleteSubscriber(id) {
     return adminFetch(`/api/admin/newsletter/subscribers/${id}`, { method: 'DELETE' })
   },
 

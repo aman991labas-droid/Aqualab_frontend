@@ -17,7 +17,7 @@ import { Toast } from '../components/ui/Toast'
 
 const statusOptions = [
   { value: 'all', label: 'Tous' },
-  { value: 'active', label: 'Actifs' },
+  { value: 'active', label: 'Inscrit' },
   { value: 'unsubscribed', label: 'Désinscrits' },
 ]
 
@@ -37,9 +37,13 @@ export default function NewsletterPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
-  const [status, setStatus] = useState('active')
+  const [status, setStatus] = useState('all')
   const [page, setPage] = useState(1)
   const [deactivating, setDeactivating] = useState(null)
+  const [reactivating, setReactivating] = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [deletingMultiple, setDeletingMultiple] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [actionLoading, setActionLoading] = useState(false)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [addEmail, setAddEmail] = useState('')
@@ -80,18 +84,72 @@ export default function NewsletterPage() {
     return () => clearTimeout(timer)
   }, [query])
 
-  const deactivate = async () => {
+  const handleDeactivate = async () => {
     if (!deactivating) return
     setActionLoading(true)
     try {
       await newsletterService.deactivateSubscriber(deactivating.id)
-      Toast.success('Abonné supprimé.')
+      Toast.success('Abonné désinscrit.')
       setDeactivating(null)
       load()
     } catch {
-      Toast.error('Impossible de supprimer cet abonné.')
+      Toast.error('Impossible de désinscrire.')
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  const handleReactivate = async () => {
+    if (!reactivating) return
+    setActionLoading(true)
+    try {
+      await newsletterService.reactivateSubscriber(reactivating.id)
+      Toast.success('Abonné réinscrit.')
+      setReactivating(null)
+      load()
+    } catch {
+      Toast.error('Impossible de réinscrire.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleting && !deletingMultiple) return
+    setActionLoading(true)
+    try {
+      if (deletingMultiple) {
+        for (const id of selectedIds) {
+          await newsletterService.deleteSubscriber(id)
+        }
+        Toast.success('Abonnés supprimés.')
+        setDeletingMultiple(false)
+        setSelectedIds([])
+      } else {
+        await newsletterService.deleteSubscriber(deleting.id)
+        Toast.success('Abonné supprimé.')
+        setDeleting(null)
+      }
+      load()
+    } catch {
+      Toast.error('Impossible de supprimer.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds(prev => [...prev, id])
+    else setSelectedIds(prev => prev.filter(i => i !== id))
+  }
+
+  const onSelectAll = (checked, currentRows) => {
+    if (checked) {
+      const newIds = currentRows.map(r => r.id).filter(id => !selectedIds.includes(id))
+      setSelectedIds(prev => [...prev, ...newIds])
+    } else {
+      const rowIds = currentRows.map(r => r.id)
+      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
     }
   }
 
@@ -144,17 +202,29 @@ export default function NewsletterPage() {
         <Select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }} options={statusOptions} />
       </FilterBar>
 
+      {selectedIds.length > 0 && (
+        <div className="admin-actions" style={{ marginBottom: '1rem', justifyContent: 'flex-start' }}>
+          <button className="btn btn-primary" onClick={() => setDeletingMultiple(true)}>
+            Supprimer la sélection ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {items.length === 0 ? (
         <EmptyState title="Aucun abonné" />
       ) : (
         <>
           <DataTable
+            selectable
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onSelectAll={onSelectAll}
             columns={[
               { key: 'email', label: 'Email' },
               {
                 key: 'isActive',
                 label: 'Statut',
-                render: (value) => (value ? 'Actif' : 'Désinscrit'),
+                render: (value) => (value ? 'Inscrit' : 'Désinscrit'),
               },
               {
                 key: 'subscribedAt',
@@ -172,9 +242,20 @@ export default function NewsletterPage() {
             sortDir="desc"
             onSort={() => {}}
             actions={(row) => (
-              <button className="btn btn-sm btn-primary" onClick={() => setDeactivating(row)}>
-                Supprimer
-              </button>
+              <>
+                {row.isActive ? (
+                  <button className="btn btn-sm btn-outline-dark" style={{ marginRight: '8px' }} onClick={() => setDeactivating(row)}>
+                    Se désinscrire
+                  </button>
+                ) : (
+                  <button className="btn btn-sm btn-outline-dark" style={{ marginRight: '8px' }} onClick={() => setReactivating(row)}>
+                    S'inscrire  
+                  </button>
+                )}
+                {/* <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
+                  Supprimer
+                </button> */}
+              </>
             )}
           />
           <Pagination page={meta.current_page} totalPages={meta.last_page} onChange={setPage} />
@@ -182,11 +263,29 @@ export default function NewsletterPage() {
       )}
 
       <ConfirmationDialog
+        open={!!deleting || deletingMultiple}
+        title={deletingMultiple ? "Supprimer la sélection ?" : "Supprimer cet abonné ?"}
+        message={deletingMultiple ? `Cette action supprimera ${selectedIds.length} abonné(s).` : (deleting ? deleting.email : '')}
+        onCancel={() => { setDeleting(null); setDeletingMultiple(false); }}
+        onConfirm={handleDelete}
+        loading={actionLoading}
+      />
+
+      <ConfirmationDialog
         open={!!deactivating}
-        title="Supprimer cet abonné ?"
+        title="Désinscrire cet abonné ?"
         message={deactivating ? deactivating.email : ''}
         onCancel={() => setDeactivating(null)}
-        onConfirm={deactivate}
+        onConfirm={handleDeactivate}
+        loading={actionLoading}
+      />
+
+      <ConfirmationDialog
+        open={!!reactivating}
+        title="Réinscrire cet abonné ?"
+        message={reactivating ? reactivating.email : ''}
+        onCancel={() => setReactivating(null)}
+        onConfirm={handleReactivate}
         loading={actionLoading}
       />
 

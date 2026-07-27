@@ -16,16 +16,19 @@ import { mainCategoryService } from '../services/mainCategoryService'
 
 const PAGE_SIZE = 8
 
+const generateId = (label) => label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
 export default function MainCategoriesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [items, setItems] = useState([])
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState({ key: 'sortOrder', dir: 'asc' })
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const [deletingMultiple, setDeletingMultiple] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({ id: '', label: '', sortOrder: 0 })
   const [errors, setErrors] = useState({})
@@ -49,27 +52,36 @@ export default function MainCategoriesPage() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase()
     const list = items.filter(
-      (i) => i.id.toLowerCase().includes(q) || i.label.toLowerCase().includes(q)
+      (i) => i.label.toLowerCase().includes(q)
     )
     return list.sort((a, b) => {
-      const av = a[sort.key]
-      const bv = b[sort.key]
-      if (av < bv) return sort.dir === 'asc' ? -1 : 1
-      if (av > bv) return sort.dir === 'asc' ? 1 : -1
+      if (a.sortOrder < b.sortOrder) return -1
+      if (a.sortOrder > b.sortOrder) return 1
       return 0
     })
-  }, [items, query, sort])
+  }, [items, query])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-
-  const onSort = (key) => {
-    setSort((prev) => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }))
+  
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds(prev => [...prev, id])
+    else setSelectedIds(prev => prev.filter(i => i !== id))
   }
+
+  const onSelectAll = (checked, currentRows) => {
+    if (checked) {
+      const newIds = currentRows.map(r => r.id).filter(id => !selectedIds.includes(id))
+      setSelectedIds(prev => [...prev, ...newIds])
+    } else {
+      const rowIds = currentRows.map(r => r.id)
+      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
+    }
+  }
+
+  const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const validate = () => {
     const next = {}
-    if (!editing && !form.id.trim()) next.id = 'Identifiant requis.'
     if (!form.label.trim()) next.label = 'Libellé requis.'
     return next
   }
@@ -102,7 +114,7 @@ export default function MainCategoriesPage() {
         Toast.success('Catégorie principale mise à jour.')
       } else {
         await mainCategoryService.createMainCategory({
-          id: form.id,
+          id: generateId(form.label),
           label: form.label,
           sortOrder: Number(form.sortOrder) || 0,
         })
@@ -118,10 +130,22 @@ export default function MainCategoriesPage() {
   }
 
   const deleteItem = async () => {
-    if (!deleting) return
+    if (!deleting && !deletingMultiple) return
     setSubmitting(true)
     try {
-      await mainCategoryService.deleteMainCategory(deleting.id)
+      if (deletingMultiple) {
+        for (const id of selectedIds) {
+          await mainCategoryService.deleteMainCategory(id)
+        }
+        Toast.success('Éléments supprimés.')
+        setDeletingMultiple(false)
+        setSelectedIds([])
+      } else {
+        await mainCategoryService.deleteMainCategory(deleting.id)
+        Toast.success('Élément supprimé.')
+        setDeleting(null)
+      }
+      load()
       Toast.success('Catégorie principale supprimée.')
       setDeleting(null)
       load()
@@ -145,31 +169,40 @@ export default function MainCategoriesPage() {
       </div>
 
       <FilterBar>
-        <SearchBar value={query} onChange={setQuery} placeholder="Rechercher par identifiant ou libellé..." />
+        <SearchBar value={query} onChange={setQuery} placeholder="Rechercher par libellé..." />
       </FilterBar>
+
+      
+      {selectedIds.length > 0 && (
+        <div className="admin-actions" style={{ marginBottom: '1rem', justifyContent: 'flex-start' }}>
+          <button className="btn btn-primary" onClick={() => setDeletingMultiple(true)}>
+            Supprimer la sélection ({selectedIds.length})
+          </button>
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <EmptyState title="Aucune catégorie principale" />
       ) : (
         <>
           <DataTable
+            selectable
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onSelectAll={onSelectAll}
             columns={[
-              { key: 'id', label: 'Identifiant', sortable: true },
-              { key: 'label', label: 'Libellé', sortable: true },
-              { key: 'sortOrder', label: 'Ordre', sortable: true },
+              { key: 'label', label: 'Libellé' },
+              // { key: 'sortOrder', label: 'Ordre' },
             ]}
             rows={rows}
-            sortKey={sort.key}
-            sortDir={sort.dir}
-            onSort={onSort}
             actions={(row) => (
               <>
                 <button className="btn btn-sm btn-outline-dark" onClick={() => openEdit(row)}>
                   Modifier
                 </button>
-                <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
+                {/* <button className="btn btn-sm btn-primary" onClick={() => setDeleting(row)}>
                   Supprimer
-                </button>
+                </button> */}
               </>
             )}
           />
@@ -184,15 +217,6 @@ export default function MainCategoriesPage() {
       >
         <form className="admin-form-grid" onSubmit={save}>
           <Input
-            label="Identifiant"
-            required
-            value={form.id}
-            disabled={!!editing}
-            onChange={(e) => setForm((p) => ({ ...p, id: e.target.value }))}
-            error={errors.id}
-            placeholder="ex: laboratoire"
-          />
-          <Input
             label="Libellé"
             required
             value={form.label}
@@ -200,13 +224,13 @@ export default function MainCategoriesPage() {
             error={errors.label}
             placeholder="ex: Laboratoire"
           />
-          <Input
+          {/* <Input
             label="Ordre d'affichage"
             type="number"
             min={0}
             value={form.sortOrder}
             onChange={(e) => setForm((p) => ({ ...p, sortOrder: e.target.value }))}
-          />
+          /> */}
           <div className="admin-actions">
             <button type="button" className="btn btn-outline-dark" onClick={() => setModalOpen(false)}>
               Annuler
@@ -219,10 +243,10 @@ export default function MainCategoriesPage() {
       </Modal>
 
       <ConfirmationDialog
-        open={!!deleting}
-        title="Supprimer cette catégorie principale ?"
-        message={deleting ? `Cette action supprimera "${deleting.label}" (id: ${deleting.id}).` : ''}
-        onCancel={() => setDeleting(null)}
+        open={!!deleting || deletingMultiple}
+        title={deletingMultiple ? "Supprimer la sélection ?" : "Supprimer cette catégorie principale ?"}
+        message={deletingMultiple ? `Cette action supprimera ${selectedIds.length} élément(s).` : (deleting ? `Cette action supprimera "${deleting.label}" (id: ${deleting.id}).` : '')}
+        onCancel={() => { setDeleting(null); setDeletingMultiple(false); }}
         onConfirm={deleteItem}
         loading={submitting}
       />
