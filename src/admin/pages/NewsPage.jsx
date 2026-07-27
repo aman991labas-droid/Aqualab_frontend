@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link2 } from 'lucide-react'
+import { Link2, Sparkles } from 'lucide-react'
 import { newsService } from '../services/newsService'
 import { categoryService } from '../services/categoryService'
 import { generateSlug } from '../utils/slug'
@@ -80,6 +80,7 @@ export default function NewsPage() {
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
   const [generatingSlug, setGeneratingSlug] = useState(false)
+  const [generatingContent, setGeneratingContent] = useState(false)
   const slugManuallyEdited = useRef(false)
 
   const load = async () => {
@@ -203,6 +204,32 @@ export default function NewsPage() {
       Toast.error('Impossible de générer le slug SEO.')
     } finally {
       setGeneratingSlug(false)
+    }
+  }
+
+  const handleGenerateContent = async () => {
+    if (!form.title?.trim()) {
+      Toast.error('Renseignez le titre avant de générer le contenu.')
+      return
+    }
+
+    setGeneratingContent(true)
+    try {
+      const result = await newsService.generateContent({
+        title: form.title,
+        categoryLabel: categoryLabel(form.category),
+      })
+      setForm((prev) => ({
+        ...prev,
+        excerpt: result.excerpt || prev.excerpt,
+        content: result.content || prev.content,
+        readTime: result.read_time || prev.readTime,
+      }))
+      Toast.success(result.source === 'gemini' ? 'Contenu généré avec Gemini.' : 'Contenu généré automatiquement.')
+    } catch {
+      Toast.error('Impossible de générer le contenu.')
+    } finally {
+      setGeneratingContent(false)
     }
   }
 
@@ -361,6 +388,22 @@ export default function NewsPage() {
               Gratuit et automatique — aucune clé API requise. Optimise l&apos;URL pour Google (ex: /actualites/votre-slug).
             </p>
           </div>
+
+          <div className="admin-ai-action">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-dark"
+              onClick={handleGenerateContent}
+              disabled={generatingContent || !form.title?.trim()}
+            >
+              <Sparkles size={14} aria-hidden="true" />
+              {generatingContent ? 'Génération...' : 'Générer idée générale & contenu'}
+            </button>
+            <p className="admin-ai-action__hint">
+              Rédige l&apos;idée générale et le contenu Markdown à partir du titre. Utilise Gemini si configuré, sinon modèle gratuit intégré.
+            </p>
+          </div>
+
           <Textarea label="Idée générale" required value={form.excerpt} onChange={(e) => setForm((p) => ({ ...p, excerpt: e.target.value }))} error={errors.excerpt} rows={3} />
           <RichTextEditor label="content" required value={form.content} onChange={(value) => setForm((p) => ({ ...p, content: value }))} error={errors.content} />
           <Select

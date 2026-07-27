@@ -161,6 +161,46 @@ function finalizeScore(result, cvAnalysis) {
   }
 }
 
+export function generateArticleContentFallback({ title, categoryLabel }) {
+  const category = categoryLabel || 'laboratoire et industrie'
+  const topic = (title || '').toLowerCase()
+
+  const excerpt = `Découvrez notre analyse sur ${title} : méthodes, équipements et bonnes pratiques pour les professionnels du secteur ${category} au Maroc.`
+
+  let content = [
+    `## Introduction\n\n${title} est un sujet clé pour les laboratoires et industries marocaines. Aqualab Technologie vous présente les points essentiels à connaître pour optimiser vos analyses et garantir des résultats fiables.`,
+    `## Contexte et enjeux\n\nDans un environnement où la qualité et la conformité aux normes sont primordiales, les équipements adaptés et les procédures rigoureuses font toute la différence. Que vous travailliez en ${category}, la maîtrise de ce domaine est indispensable.`,
+    '## Points clés\n\n- **Précision** : des mesures fiables pour des décisions éclairées\n- **Conformité** : respect des normes internationales en vigueur\n- **Performance** : équipements adaptés à vos applications spécifiques\n- **Accompagnement** : formation et support technique par nos experts',
+    `## Solutions Aqualab\n\nAqualab Technologie distribue une gamme complète d'équipements certifiés pour répondre à vos besoins en ${category}. Nos ingénieurs vous conseillent dans le choix, l'installation et la maintenance de vos instruments.`,
+    `## Conclusion\n\nPour aller plus loin sur « ${title} », contactez l'équipe Aqualab Technologie. Nous vous accompagnons dans la sélection des meilleures solutions adaptées à votre activité.`,
+  ].join('\n\n')
+
+  if (topic.includes('eau') || topic.includes('qualité')) {
+    content = content.replace(
+      '## Points clés\n\n- **Précision**',
+      '## Paramètres essentiels\n\n- **pH et conductivité** : indicateurs fondamentaux\n- **Turbidité** : clarté et qualité visuelle de l\'eau\n- **DCO/DBO** : charge organique et impact environnemental\n\n## Points clés\n\n- **Précision**'
+    )
+  }
+
+  if (topic.includes('microscope') || topic.includes('microscop')) {
+    content = content.replace(
+      '## Points clés\n\n- **Précision**',
+      '## Applications\n\n- **Contrôle qualité** : inspection visuelle des composants\n- **Recherche** : observation et documentation d\'échantillons\n- **Industrie** : analyse métallurgique et matériaux\n\n## Points clés\n\n- **Précision**'
+    )
+  }
+
+  const wordCount = content.split(/\s+/).filter(Boolean).length
+  const readTime = Math.max(1, Math.ceil(wordCount / 200))
+
+  return {
+    excerpt,
+    content,
+    read_time: readTime,
+    source: 'template',
+    ai_enabled: false,
+  }
+}
+
 export function scoreApplicationFallback(application) {
   const cvAnalysis = analyzeCvFilename(application.cvFile)
   let score = cvAnalysis.score_adjustment

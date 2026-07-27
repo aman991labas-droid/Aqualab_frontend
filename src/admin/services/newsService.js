@@ -2,6 +2,7 @@ import { adminFetch, useApiBackend } from '@/services/api/adminClient'
 import { initialArticles } from '../data/mockData'
 import { delay } from './mockUtils'
 import { ensureUniqueSlug, generateSeoSlug } from '../utils/slug'
+import { generateArticleContentFallback } from '../utils/aiHelpers'
 
 let articles = initialArticles.map((a) => ({ ...a, author: { ...a.author } }))
 
@@ -119,5 +120,20 @@ export const newsService = {
       .map((item) => item.slug)
     const baseSlug = generateSeoSlug({ title, excerpt, categoryLabel })
     return ensureUniqueSlug(baseSlug, existingSlugs)
+  },
+
+  async generateContent({ title, categoryLabel }) {
+    if (useApiBackend()) {
+      return adminFetch('/api/articles/generate-content', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: title?.trim(),
+          category_label: categoryLabel || null,
+        }),
+      })
+    }
+
+    await delay(400)
+    return generateArticleContentFallback({ title, categoryLabel })
   },
 }
