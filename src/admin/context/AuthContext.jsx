@@ -29,9 +29,6 @@ export function AuthProvider({ children }) {
         authService.logout()
         setSession(null)
       },
-      async forgotPassword(email) {
-        return authService.forgotPassword(email)
-      },
     }),
     [session, initializing]
   )

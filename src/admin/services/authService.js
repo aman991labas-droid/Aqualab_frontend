@@ -48,10 +48,4 @@ export const authService = {
   getSession() {
     return getAdminSession()
   },
-
-  async forgotPassword(email) {
-    await delay(700)
-    if (!email || !email.includes('@')) throw new Error('Veuillez saisir un email valide.')
-    return { ok: true, message: 'Lien de reinitialisation envoye.' }
-  },
 }

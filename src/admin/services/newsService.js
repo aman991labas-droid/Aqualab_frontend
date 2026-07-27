@@ -1,6 +1,7 @@
 import { adminFetch, useApiBackend } from '@/services/api/adminClient'
 import { initialArticles } from '../data/mockData'
 import { delay } from './mockUtils'
+import { ensureUniqueSlug, generateSeoSlug } from '../utils/slug'
 
 let articles = initialArticles.map((a) => ({ ...a, author: { ...a.author } }))
 
@@ -96,5 +97,27 @@ export const newsService = {
     await delay()
     articles = articles.filter((item) => item.id !== id)
     return { ok: true }
+  },
+
+  async suggestSlug({ title, excerpt, categoryLabel, excludeId }) {
+    if (useApiBackend()) {
+      const result = await adminFetch('/api/articles/suggest-slug', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: title?.trim(),
+          excerpt: excerpt?.trim() || null,
+          category_label: categoryLabel || null,
+          exclude_id: excludeId || null,
+        }),
+      })
+      return result?.slug ?? ''
+    }
+
+    await delay(200)
+    const existingSlugs = articles
+      .filter((item) => item.id !== excludeId)
+      .map((item) => item.slug)
+    const baseSlug = generateSeoSlug({ title, excerpt, categoryLabel })
+    return ensureUniqueSlug(baseSlug, existingSlugs)
   },
 }

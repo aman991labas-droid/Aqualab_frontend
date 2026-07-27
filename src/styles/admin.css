@@ -288,6 +288,151 @@
   gap: 0.75rem;
 }
 
+.admin-slug-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-slug-field__btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-slug-field__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.admin-ai-action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.admin-ai-action__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.admin-ai-action .btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-priority {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-priority--high {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.admin-priority--medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.admin-priority--low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-priority--none {
+  background: var(--border);
+  color: var(--text-secondary);
+}
+
+.admin-ai-panel {
+  margin-bottom: 1rem;
+  padding: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.admin-ai-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-ai-panel__head h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.admin-ai-panel ul {
+  margin: 0.25rem 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.admin-ai-panel__cv {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.admin-cv-status {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-cv-status--valid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.admin-cv-status--suspicious {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-cv-status--missing {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.admin-cv-status--unknown {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.admin-ai-panel__source {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.admin-ai-panel__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
 .admin-form-stack {
   display: flex;
   flex-direction: column;

@@ -2,6 +2,7 @@ import { adminFetch, useApiBackend } from '@/services/api/adminClient'
 import { initialProductTabs } from '../data/mockData'
 import { mainCategoryService } from './mainCategoryService'
 import { delay } from './mockUtils'
+import { generateProductDescriptionFallback } from '../utils/aiHelpers'
 
 let tabs = initialProductTabs.map((tab) => ({
   ...tab,
@@ -215,5 +216,34 @@ export const productService = {
     if (!tab) throw new Error('Onglet introuvable.')
     tab.categories = tab.categories.filter((_, i) => i !== categoryIndex)
     return { ok: true }
+  },
+
+  async generateDescription({ title, partner, tabId, categoryLabel, items }) {
+    const payload = {
+      title: title?.trim(),
+      partner: partner?.trim() || null,
+      group: tabId,
+      category_label: categoryLabel || tabId,
+      items: (items || []).map((item) => ({
+        name: item.name?.trim() || '',
+        details: item.details?.trim() || '',
+      })),
+    }
+
+    if (useApiBackend()) {
+      return adminFetch('/api/categories/generate-description', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    }
+
+    await delay(400)
+    return generateProductDescriptionFallback({
+      title: payload.title,
+      partner: payload.partner,
+      tabId,
+      categoryLabel: payload.category_label,
+      items: payload.items,
+    })
   },
 }

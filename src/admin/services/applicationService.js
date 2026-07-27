@@ -5,6 +5,7 @@ import {
 } from '@/services/api/adminClient'
 import { initialApplications } from '../data/mockData'
 import { delay, uid } from './mockUtils'
+import { scoreApplicationFallback } from '../utils/aiHelpers'
 
 let applications = initialApplications.map((a) => ({ ...a }))
 
@@ -59,5 +60,17 @@ export const applicationService = {
     await delay()
     applications = applications.filter((item) => item.id !== id)
     return { ok: true }
+  },
+
+  async scoreApplication(id) {
+    if (useApiBackend()) {
+      const numericId = parseApplicationId(id)
+      return adminFetch(`/api/applications/${numericId}/priority-score`, { method: 'POST' })
+    }
+
+    await delay(300)
+    const application = applications.find((item) => item.id === id)
+    if (!application) throw new Error('Candidature introuvable.')
+    return scoreApplicationFallback(application)
   },
 }

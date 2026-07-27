@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Sparkles } from 'lucide-react'
 import { applicationService } from '../services/applicationService'
+import { priorityClass, priorityLabel, cvStatusClass, cvStatusLabel } from '../utils/aiHelpers'
 import DataTable from '../components/ui/DataTable'
 import SearchBar from '../components/ui/SearchBar'
 import Select from '../components/ui/Select'
@@ -24,6 +26,15 @@ const statusOptions = [
   { value: 'rejected', label: 'Rejected' },
 ]
 
+function PriorityBadge({ score, priority }) {
+  if (score == null) return <span className="admin-priority admin-priority--none">—</span>
+  return (
+    <span className={`admin-priority ${priorityClass(priority)}`}>
+      {score}/100 · {priorityLabel(priority)}
+    </span>
+  )
+}
+
 export default function ApplicationsPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -34,6 +45,8 @@ export default function ApplicationsPage() {
   const [details, setDetails] = useState(null)
   const [deleting, setDeleting] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [scores, setScores] = useState({})
+  const [scoringId, setScoringId] = useState(null)
 
   const load = async () => {
     setLoading(true)
@@ -63,8 +76,32 @@ export default function ApplicationsPage() {
     })
   }, [items, query, status])
 
-  const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const sortedRows = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const scoreA = scores[a.id]?.score ?? -1
+      const scoreB = scores[b.id]?.score ?? -1
+      return scoreB - scoreA
+    })
+  }, [filtered, scores])
+
+  const rows = sortedRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+
+  const scoreApplication = async (row, { openDetails = false } = {}) => {
+    setScoringId(row.id)
+    try {
+      const result = await applicationService.scoreApplication(row.id)
+      setScores((prev) => ({ ...prev, [row.id]: result }))
+      if (openDetails) {
+        setDetails({ ...row, priorityScore: result })
+      }
+      Toast.success(result.source === 'gemini' ? 'Score IA Gemini calculé.' : 'Score calculé.')
+    } catch {
+      Toast.error('Impossible de calculer le score.')
+    } finally {
+      setScoringId(null)
+    }
+  }
 
   const setRowStatus = async (id, nextStatus) => {
     setActionLoading(true)
@@ -93,12 +130,14 @@ export default function ApplicationsPage() {
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorState message={error} onRetry={load} />
 
+  const activeScore = details?.priorityScore || (details ? scores[details.id] : null)
+
   return (
     <section className="admin-page">
       <div className="admin-page__head">
         <h1>Candidatures spontanées</h1>
       </div>
-   
+
       <FilterBar>
         <SearchBar value={query} onChange={setQuery} placeholder="Nom, email, spécialité..." />
         <Select
@@ -115,8 +154,17 @@ export default function ApplicationsPage() {
             columns={[
               { key: 'name', label: 'name' },
               { key: 'email', label: 'email' },
-              { key: 'tel', label: 'tel' },
               { key: 'jobType', label: 'jobType' },
+              {
+                key: 'priority',
+                label: 'Score IA',
+                render: (_, row) => (
+                  <PriorityBadge
+                    score={scores[row.id]?.score}
+                    priority={scores[row.id]?.priority}
+                  />
+                ),
+              },
               { key: 'submittedAt', label: 'submittedAt' },
               {
                 key: 'status',
@@ -138,7 +186,15 @@ export default function ApplicationsPage() {
             onSort={() => {}}
             actions={(row) => (
               <>
-                <button className="btn btn-sm btn-outline-dark" onClick={() => setDetails(row)}>
+                <button
+                  className="btn btn-sm btn-outline-dark"
+                  onClick={() => scoreApplication(row)}
+                  disabled={scoringId === row.id}
+                >
+                  <Sparkles size={13} aria-hidden="true" />
+                  {scoringId === row.id ? 'Analyse...' : 'Analyser'}
+                </button>
+                <button className="btn btn-sm btn-outline-dark" onClick={() => setDetails({ ...row, priorityScore: scores[row.id] })}>
                   Détails
                 </button>
                 {row.cvUrl && (
@@ -159,6 +215,58 @@ export default function ApplicationsPage() {
       <Modal open={!!details} onClose={() => setDetails(null)} title="Détails candidature">
         {details && (
           <div className="admin-details">
+            {activeScore && (
+              <div className="admin-ai-panel">
+                <div className="admin-ai-panel__head">
+                  <h3>Score de priorité</h3>
+                  <PriorityBadge score={activeScore.score} priority={activeScore.priority} />
+                </div>
+                {activeScore.cv_status && (
+                  <p className="admin-ai-panel__cv">
+                    Fichier joint :{' '}
+                    <span className={`admin-cv-status ${cvStatusClass(activeScore.cv_status)}`}>
+                      {cvStatusLabel(activeScore.cv_status)}
+                    </span>
+                    {details.cvFile ? ` — ${details.cvFile}` : ''}
+                  </p>
+                )}
+                <p>{activeScore.summary}</p>
+                {activeScore.strengths?.length > 0 && (
+                  <>
+                    <strong>Points forts</strong>
+                    <ul>
+                      {activeScore.strengths.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {activeScore.concerns?.length > 0 && (
+                  <>
+                    <strong>Points d&apos;attention</strong>
+                    <ul>
+                      {activeScore.concerns.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                <p className="admin-ai-panel__source">
+                  {activeScore.source === 'gemini' ? 'Analysé par Gemini (Google AI)' : 'Analyse automatique (sans clé API)'}
+                </p>
+              </div>
+            )}
+            {!activeScore && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-dark admin-ai-panel__action"
+                onClick={() => scoreApplication(details, { openDetails: true })}
+                disabled={scoringId === details.id}
+              >
+                <Sparkles size={14} aria-hidden="true" />
+                {scoringId === details.id ? 'Analyse en cours...' : 'Analyser avec Gemini'}
+              </button>
+            )}
             <p><strong>name:</strong> {details.name}</p>
             <p><strong>email:</strong> {details.email}</p>
             <p><strong>tel:</strong> {details.tel || '—'}</p>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Input from '@/admin/components/ui/Input'
 import ThemeToggle from '@/components/ui/ThemeToggle'
@@ -74,9 +73,6 @@ export default function LoginPage() {
         <button type="submit" className="btn btn-primary w-full" disabled={loading}>
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
-        <Link href="/admin/forgot-password" className="admin-auth__link">
-          Mot de passe oublie ?
-        </Link>
       </form>
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Sparkles } from 'lucide-react'
 import { productService } from '../services/productService'
 import DataTable from '../components/ui/DataTable'
 import SearchBar from '../components/ui/SearchBar'
@@ -62,6 +63,7 @@ export default function ProductsPage() {
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
+  const [generatingDesc, setGeneratingDesc] = useState(false)
 
   const load = async ({ silent = false } = {}) => {
     if (!silent) setLoading(true)
@@ -238,6 +240,49 @@ export default function ProductsPage() {
     })
   }
 
+  const handleGenerateDescriptions = async () => {
+    if (!form.title?.trim()) {
+      Toast.error('Renseignez le nom de la catégorie produit.')
+      return
+    }
+    if (!form.items.some((item) => item.name?.trim())) {
+      Toast.error('Ajoutez au moins un modèle avec un nom.')
+      return
+    }
+
+    setGeneratingDesc(true)
+    try {
+      const categoryLabel = tabs.find((t) => t.id === form.tabId)?.label
+      const result = await productService.generateDescription({
+        title: form.title,
+        partner: form.partner,
+        tabId: form.tabId,
+        categoryLabel,
+        items: form.items,
+      })
+
+      setForm((prev) => ({
+        ...prev,
+        metaTitle: result.seo_title || prev.metaTitle,
+        metaDescription: result.seo_description || result.short_desc || prev.metaDescription,
+        items: prev.items.map((item, index) => ({
+          ...item,
+          details: result.items?.[index]?.details || item.details,
+        })),
+      }))
+
+      Toast.success(
+        result.source === 'gemini'
+          ? 'Descriptions générées avec Gemini.'
+          : 'Descriptions générées automatiquement.'
+      )
+    } catch {
+      Toast.error('Impossible de générer les descriptions.')
+    } finally {
+      setGeneratingDesc(false)
+    }
+  }
+
   const save = async (e) => {
     e.preventDefault()
     const nextErrors = validate()
@@ -394,6 +439,21 @@ export default function ProductsPage() {
               preview={form.partnerLogo}
               previewClassName="admin-image-preview--logo"
             />
+          </div>
+
+          <div className="admin-ai-action">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-dark"
+              onClick={handleGenerateDescriptions}
+              disabled={generatingDesc || !form.title?.trim()}
+            >
+              <Sparkles size={14} aria-hidden="true" />
+              {generatingDesc ? 'Génération...' : 'Générer descriptions avec Gemini'}
+            </button>
+            <p className="admin-ai-action__hint">
+              Rédige les détails des modèles et le texte SEO. Gratuit avec la clé Gemini (aistudio.google.com).
+            </p>
           </div>
 
           <hr className="admin-form-divider" />

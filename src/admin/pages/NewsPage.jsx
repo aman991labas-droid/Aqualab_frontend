@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link2 } from 'lucide-react'
 import { newsService } from '../services/newsService'
 import { categoryService } from '../services/categoryService'
+import { generateSlug } from '../utils/slug'
 import DataTable from '../components/ui/DataTable'
 import SearchBar from '../components/ui/SearchBar'
 import Pagination from '../components/ui/Pagination'
@@ -75,6 +77,8 @@ export default function NewsPage() {
   const [previewAvatar, setPreviewAvatar] = useState('')
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
+  const [generatingSlug, setGeneratingSlug] = useState(false)
+  const slugManuallyEdited = useRef(false)
 
   const load = async () => {
     setLoading(true)
@@ -117,6 +121,7 @@ export default function NewsPage() {
 
   const openCreate = () => {
     setEditing(null)
+    slugManuallyEdited.current = false
     setForm({ ...emptyForm, category: categories[0]?.id || 'laboratoire' })
     setPreviewImg('')
     setPreviewAvatar('/images/logo.png')
@@ -126,6 +131,7 @@ export default function NewsPage() {
 
   const openEdit = (item) => {
     setEditing(item)
+    slugManuallyEdited.current = true
     setForm({
       slug: item.slug,
       title: item.title,
@@ -142,6 +148,43 @@ export default function NewsPage() {
     setPreviewAvatar(item.author?.avatar || '/images/logo.png')
     setErrors({})
     setModalOpen(true)
+  }
+
+  const handleTitleChange = (title) => {
+    setForm((prev) => ({
+      ...prev,
+      title,
+      ...(slugManuallyEdited.current || editing ? {} : { slug: generateSlug(title) }),
+    }))
+  }
+
+  const handleSlugChange = (slug) => {
+    slugManuallyEdited.current = true
+    setForm((prev) => ({ ...prev, slug }))
+  }
+
+  const handleGenerateSeoSlug = async () => {
+    if (!form.title?.trim()) {
+      Toast.error('Renseignez le titre avant de générer le slug.')
+      return
+    }
+
+    setGeneratingSlug(true)
+    try {
+      const slug = await newsService.suggestSlug({
+        title: form.title,
+        excerpt: form.excerpt,
+        categoryLabel: categoryLabel(form.category),
+        excludeId: editing?.id,
+      })
+      slugManuallyEdited.current = true
+      setForm((prev) => ({ ...prev, slug }))
+      Toast.success('Slug SEO généré.')
+    } catch {
+      Toast.error('Impossible de générer le slug SEO.')
+    } finally {
+      setGeneratingSlug(false)
+    }
   }
 
   const save = async (e) => {
@@ -252,8 +295,28 @@ export default function NewsPage() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier l\'actualité' : 'Créer une actualité'} width="760px">
         <form className="admin-form-grid" onSubmit={save}>
-          <Input label="title" required value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} error={errors.title} />
-          <Input label="slug" required value={form.slug} onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))} error={errors.slug} />
+          <Input label="title" required value={form.title} onChange={(e) => handleTitleChange(e.target.value)} error={errors.title} />
+          <div className="admin-slug-field">
+            <Input
+              label="slug"
+              required
+              value={form.slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              error={errors.slug}
+            />
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-dark admin-slug-field__btn"
+              onClick={handleGenerateSeoSlug}
+              disabled={generatingSlug || !form.title?.trim()}
+            >
+              <Link2 size={14} aria-hidden="true" />
+              {generatingSlug ? 'Génération...' : 'Générer slug SEO'}
+            </button>
+            <p className="admin-slug-field__hint">
+              Gratuit et automatique — aucune clé API requise. Optimise l&apos;URL pour Google (ex: /actualites/votre-slug).
+            </p>
+          </div>
           <Textarea label="Idée générale" required value={form.excerpt} onChange={(e) => setForm((p) => ({ ...p, excerpt: e.target.value }))} error={errors.excerpt} rows={3} />
           <RichTextEditor label="content" required value={form.content} onChange={(value) => setForm((p) => ({ ...p, content: value }))} error={errors.content} />
           <Select
