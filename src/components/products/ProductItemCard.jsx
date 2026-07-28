@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Images, Package, ZoomIn } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Images, Package, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react'
 import AppImage from '@/components/ui/AppImage'
 import ImageLightbox from '@/components/ui/ImageLightbox'
 import { normalizeProductItem } from '@/lib/products'
@@ -51,28 +51,50 @@ export default function ProductItemCard({ item }) {
                         </button>
 
                         {images.length > 1 && (
-                            <div className="products-detail__item-card-thumbs" role="tablist" aria-label={`Photos de ${name}`}>
-                                {images.map((img, index) => (
-                                    <button
-                                        key={`${img.url}-${index}`}
-                                        type="button"
-                                        role="tab"
-                                        aria-selected={index === activeIndex}
-                                        aria-label={`Photo ${index + 1} de ${name}`}
-                                        className={`products-detail__item-card-thumb${index === activeIndex ? ' products-detail__item-card-thumb--active' : ''}`}
-                                        onClick={() => setActiveIndex(index)}
-                                        onDoubleClick={() => openLightbox(index)}
-                                    >
-                                        <AppImage
-                                            src={img.url}
-                                            alt=""
-                                            fill
-                                            sizes="56px"
-                                            hideOnError
-                                            fallbackSrc={null}
-                                        />
-                                    </button>
-                                ))}
+                            <div className="products-detail__item-card-thumbs-wrapper">
+                                <button
+                                    type="button"
+                                    className="products-detail__item-card-thumbs-nav products-detail__item-card-thumbs-nav--prev"
+                                    onClick={() => setActiveIndex(i => Math.max(0, i - 1))}
+                                    disabled={activeIndex === 0}
+                                    aria-label="Photo précédente"
+                                >
+                                    <ChevronLeft size={14} />
+                                </button>
+
+                                <div className="products-detail__item-card-thumbs" role="tablist" aria-label={`Photos de ${name}`}>
+                                    {images.map((img, index) => (
+                                        <button
+                                            key={`${img.url}-${index}`}
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={index === activeIndex}
+                                            aria-label={`Photo ${index + 1} de ${name}`}
+                                            className={`products-detail__item-card-thumb${index === activeIndex ? ' products-detail__item-card-thumb--active' : ''}`}
+                                            onClick={() => setActiveIndex(index)}
+                                            onDoubleClick={() => openLightbox(index)}
+                                        >
+                                            <AppImage
+                                                src={img.url}
+                                                alt=""
+                                                fill
+                                                sizes="56px"
+                                                hideOnError
+                                                fallbackSrc={null}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="products-detail__item-card-thumbs-nav products-detail__item-card-thumbs-nav--next"
+                                    onClick={() => setActiveIndex(i => Math.min(images.length - 1, i + 1))}
+                                    disabled={activeIndex === images.length - 1}
+                                    aria-label="Photo suivante"
+                                >
+                                    <ChevronRight size={14} />
+                                </button>
                             </div>
                         )}
                     </div>
