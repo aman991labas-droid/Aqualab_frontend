@@ -157,23 +157,27 @@ export default function ProductsPage() {
     })
   }, [items, query, tabFilter])
 
-  const onSelect = (id, checked) => {
-    if (checked) setSelectedIds(prev => [...prev, id])
-    else setSelectedIds(prev => prev.filter(i => i !== id))
-  }
-
-  const onSelectAll = (checked, currentRows) => {
-    if (checked) {
-      const newIds = currentRows.map(r => r.id || `${r.tabId}-${r.categoryIndex}`).filter(id => !selectedIds.includes(id))
-      setSelectedIds(prev => [...prev, ...newIds])
-    } else {
-      const rowIds = currentRows.map(r => r.id || `${r.tabId}-${r.categoryIndex}`)
-      setSelectedIds(prev => prev.filter(id => !rowIds.includes(id)))
-    }
-  }
+  const filteredWithIds = useMemo(
+    () => filtered.map((r) => ({ ...r, id: r.slug || `${r.tabId}-${r.categoryIndex}` })),
+    [filtered],
+  )
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const rows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const rows = filteredWithIds.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  const onSelect = (id, checked) => {
+    if (checked) setSelectedIds((prev) => [...new Set([...prev, id])])
+    else setSelectedIds((prev) => prev.filter((i) => i !== id))
+  }
+
+  const onSelectAll = (checked, scopeRows) => {
+    const scopeIds = scopeRows.map((r) => r.id)
+    if (checked) {
+      setSelectedIds((prev) => [...new Set([...prev, ...scopeIds])])
+    } else {
+      setSelectedIds((prev) => prev.filter((id) => !scopeIds.includes(id)))
+    }
+  }
 
   const fileToBase64 = (file, options) => compressImageFile(file, options)
 
@@ -367,11 +371,7 @@ export default function ProductsPage() {
     setSubmitting(true)
     try {
       if (deletingMultiple) {
-        const allItems = items.map(r => ({ ...r, id: `${r.tabId}-${r.categoryIndex}` }))
-        for (const id of selectedIds) {
-          const row = allItems.find(r => r.id === id)
-          if (row) await productService.deleteCategoryGroup(row.tabId, row.categoryIndex, row.slug)
-        }
+        await productService.deleteCategoryGroups(selectedIds)
         Toast.success('Catégories produits supprimées.')
         setDeletingMultiple(false)
         setSelectedIds([])
@@ -429,6 +429,7 @@ export default function ProductsPage() {
             selectedIds={selectedIds}
             onSelect={onSelect}
             onSelectAll={onSelectAll}
+            allSelectableRows={filteredWithIds}
             columns={[
               { key: 'tabLabel', label: 'Catégorie principale' },
               { 
@@ -456,7 +457,7 @@ export default function ProductsPage() {
               },
               { key: 'items', label: 'Produits', render: (v) => v.length },
             ]}
-            rows={rows.map((r) => ({ ...r, id: `${r.tabId}-${r.categoryIndex}` }))}
+            rows={rows}
             sortKey="title"
             sortDir="asc"
             onSort={() => {}}

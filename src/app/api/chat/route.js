@@ -4,7 +4,7 @@ import { streamFallbackResponse } from '@/lib/chat/fallback-responses'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite'
 
 function getBackendUrl() {
   return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || null

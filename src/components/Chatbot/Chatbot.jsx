@@ -118,7 +118,7 @@ export default function Chatbot() {
         transition={{ duration: 0.3 }}
       >
         <img
-                     src="/logoicone.jpg"
+                     src="/images/logo.png"
                      alt="Assistant Aqualab"
                      className="chatbot-avatar"
                      />
@@ -140,7 +140,7 @@ export default function Chatbot() {
               <div className="chatbot-header-info">
                 <div className="chatbot-avatar">
                      <img
-                     src="/logoicone.jpg"
+                     src="/images/logo.png"
                      alt="Assistant Aqualab"
                      className="chatbot-avatar"
                      />
@@ -169,7 +169,7 @@ export default function Chatbot() {
                   <div className="chatbot-message-content">
                     <div className="chatbot-avatar">
                       <img
-                     src="/logoicone.jpg"
+                     src="/images/logo.png"
                      alt="Assistant Aqualab"
                      className="chatbot-avatar"
                      />

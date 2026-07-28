@@ -3,9 +3,10 @@
 import { ArrowDownUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function DataTable({ columns, rows, sortKey, sortDir, onSort, actions, selectable, selectedIds = [], onSelect, onSelectAll }) {
-  const allSelected = rows.length > 0 && rows.every(row => selectedIds.includes(row.id));
-  const someSelected = rows.some(row => selectedIds.includes(row.id));
+export default function DataTable({ columns, rows, sortKey, sortDir, onSort, actions, selectable, selectedIds = [], onSelect, onSelectAll, allSelectableRows }) {
+  const selectScope = allSelectableRows ?? rows
+  const allSelected = selectScope.length > 0 && selectScope.every((row) => selectedIds.includes(row.id))
+  const someSelected = selectScope.some((row) => selectedIds.includes(row.id))
 
   return (
     <div className="admin-table-wrap">
@@ -20,7 +21,7 @@ export default function DataTable({ columns, rows, sortKey, sortDir, onSort, act
                   ref={input => {
                     if (input) input.indeterminate = someSelected && !allSelected;
                   }}
-                  onChange={(e) => onSelectAll && onSelectAll(e.target.checked, rows)}
+                  onChange={(e) => onSelectAll && onSelectAll(e.target.checked, selectScope)}
                 />
               </th>
             )}
