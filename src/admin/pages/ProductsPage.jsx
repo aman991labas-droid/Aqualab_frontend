@@ -327,7 +327,7 @@ export default function ProductsPage() {
 
       Toast.success(
         result.source === 'gemini'
-          ? 'Descriptions générées avec Gemini.'
+          ? 'Descriptions générées.'
           : 'Descriptions générées automatiquement.'
       )
     } catch {
@@ -528,10 +528,10 @@ export default function ProductsPage() {
               disabled={generatingDesc || !form.title?.trim()}
             >
               <Sparkles size={14} aria-hidden="true" />
-              {generatingDesc ? 'Génération...' : 'Générer descriptions avec Gemini'}
+              {generatingDesc ? 'Génération...' : 'descriptions généré.'}
             </button>
             <p className="admin-ai-action__hint">
-              Rédige les détails des modèles et le texte SEO. Gratuit avec la clé Gemini (aistudio.google.com).
+              Rédige les détails des modèles et le texte SEO.
             </p>
           </div>
 

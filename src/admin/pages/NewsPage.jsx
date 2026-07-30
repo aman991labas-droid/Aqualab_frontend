@@ -225,7 +225,7 @@ export default function NewsPage() {
         content: result.content || prev.content,
         readTime: result.read_time || prev.readTime,
       }))
-      Toast.success(result.source === 'gemini' ? 'Contenu généré avec Gemini.' : 'Contenu généré automatiquement.')
+      Toast.success(result.source === 'gemini' ? 'Contenu généré.' : 'Contenu généré automatiquement.')
     } catch {
       Toast.error('Impossible de générer le contenu.')
     } finally {
@@ -400,7 +400,7 @@ export default function NewsPage() {
               {generatingContent ? 'Génération...' : 'Générer idée générale & contenu'}
             </button>
             <p className="admin-ai-action__hint">
-              Rédige l&apos;idée générale et le contenu Markdown à partir du titre. Utilise Gemini si configuré, sinon modèle gratuit intégré.
+              Générer l&apos;idée générale et le contenu à partir du titre.
             </p>
           </div>
 
