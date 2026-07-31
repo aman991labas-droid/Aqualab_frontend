@@ -243,6 +243,27 @@ export const productService = {
     return { ok: true }
   },
 
+  async deleteCategoryGroups(slugs) {
+    if (!slugs?.length) return { ok: true, deleted: 0 }
+
+    if (useApiBackend()) {
+      return adminFetch('/api/categories/bulk-delete', {
+        method: 'POST',
+        body: JSON.stringify({ slugs }),
+      })
+    }
+
+    await delay()
+    const toRemove = new Set(slugs)
+    for (const tab of tabs) {
+      tab.categories = tab.categories.filter((cat, categoryIndex) => {
+        const id = cat.slug || `${tab.id}-${categoryIndex}`
+        return !toRemove.has(id)
+      })
+    }
+    return { ok: true, deleted: slugs.length }
+  },
+
   async generateDescription({ title, partner, tabId, categoryLabel, items }) {
     const payload = {
       title: title?.trim(),

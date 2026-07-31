@@ -20,7 +20,7 @@
   height: 3.75rem;
   border: none;
   border-radius: var(--radius-full);
-  background: transparent;
+  background: transparent;  
   color: var(--white);
   cursor: pointer;
   transition: box-shadow var(--transition);

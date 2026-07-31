@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import { X, Send, User, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import AqualabLogoIcon from './AqualabLogoIcon';
 import './Chatbot.css';
 
 export default function Chatbot() {
@@ -108,21 +109,24 @@ export default function Chatbot() {
 
       {/* Floating Chat Button */}
       <motion.button
-      
         className="chatbot-button"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{
+          scale: 1.1,
+          y: -4,
+          transition: { type: 'spring', stiffness: 520, damping: 12, mass: 0.6 },
+        }}
+        whileTap={{ scale: 0.92, y: 0 }}
         onClick={handleOpenChat}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0, display: isOpen ? 'none' : 'flex' }}
         transition={{ duration: 0.3 }}
+        aria-label="Ouvrir l'assistant Aqualab"
       >
-        <img
-                     src="/logoicone.jpg"
-                     alt="Assistant Aqualab"
-                     className="chatbot-avatar"
-                     />
-        {/* <MessageSquare size={28} /> */}
+        <span className="chatbot-button__pulse" aria-hidden="true" />
+        <span className="chatbot-button__pulse chatbot-button__pulse--delayed" aria-hidden="true" />
+        <span className="chatbot-button__inner">
+          <AqualabLogoIcon className="chatbot-button__logo" alt="" />
+        </span>
       </motion.button>
 
       {/* Chat Window */}
@@ -138,13 +142,8 @@ export default function Chatbot() {
             {/* Header */}
             <div className="chatbot-header">
               <div className="chatbot-header-info">
-                <div className="chatbot-avatar">
-                     <img
-                     src="/logoicone.jpg"
-                     alt="Assistant Aqualab"
-                     className="chatbot-avatar"
-                     />
-                  <Bot size={24} color="white" />
+                <div className="chatbot-header__avatar" aria-hidden="true">
+                  <AqualabLogoIcon className="chatbot-header__logo" alt="" />
                 </div>
                 <div className="chatbot-header-text">
                   <h3>Assistant Aqualab</h3>
@@ -167,13 +166,15 @@ export default function Chatbot() {
                   className={`chatbot-message-row ${msg.sender}`}
                 >
                   <div className="chatbot-message-content">
-                    <div className="chatbot-avatar">
-                      <img
-                     src="/logoicone.jpg"
-                     alt="Assistant Aqualab"
-                     className="chatbot-avatar"
-                     />
-                      {msg.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
+                    <div
+                      className="chatbot-msg-avatar"
+                      aria-hidden="true"
+                    >
+                      {msg.sender === 'user' ? (
+                        <User size={16} />
+                      ) : (
+                        <AqualabLogoIcon className="chatbot-msg-avatar__logo" alt="" />
+                      )}
                     </div>
                     <div className={`chatbot-bubble ${msg.isError ? 'error' : ''}`}>
                       {msg.sender === 'bot' && !msg.isError ? (
@@ -190,8 +191,8 @@ export default function Chatbot() {
               {isLoading && (
                 <div className="chatbot-message-row bot">
                   <div className="chatbot-message-content">
-                    <div className="chatbot-avatar">
-                      <Bot size={16} />
+                    <div className="chatbot-msg-avatar" aria-hidden="true">
+                      <AqualabLogoIcon className="chatbot-msg-avatar__logo" alt="" />
                     </div>
                     <div className="chatbot-bubble">
                       <div className="chatbot-loading">
