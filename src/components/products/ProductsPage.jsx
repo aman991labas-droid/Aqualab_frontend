@@ -132,7 +132,7 @@ export default function ProductsPage({ categories: categoriesProp = [], mainCate
         <PageTransition>
             <PageHero
                 title="Nos Produits"
-                subtitle="Une gamme rigoureusement sélectionnée d'équipements scientifiques et industriels de haute précision."
+                subtitle="Découvrez une gamme complète de solutions industrielles, didactiques et de laboratoire, sélectionnées auprès de fabricants internationaux de référence pour répondre aux exigences de performance, de fiabilité et de précision de nos clients."
                 tag="Catalogue produits"
                 breadcrumbs={breadcrumbs}
             />

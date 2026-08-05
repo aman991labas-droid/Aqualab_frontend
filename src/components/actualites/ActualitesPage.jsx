@@ -101,7 +101,7 @@ export default function ActualitesPage({
         <PageTransition>
             <PageHero
                 title="Actualités & Blog"
-                subtitle="Expertise, guides et innovations dans le domaine des équipements scientifiques et industriels."
+                subtitle="Retrouvez les dernières actualités d'AQUALAB, les nouveautés de nos partenaires, des articles techniques, des retours d'expérience et les innovations qui façonnent les secteurs industriel, scientifique et didactique."
                 tag="Notre blog"
                 breadcrumbs={breadcrumbs}
             />

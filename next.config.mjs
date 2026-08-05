@@ -9,18 +9,23 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',
-        pathname: '/storage/**',
+        pathname: '/uploads/**',
       },
       {
         protocol: 'http',
         hostname: 'localhost',
-        pathname: '/storage/**',
+        pathname: '/uploads/**',
       },
       {
         protocol: 'http',
         hostname: '127.0.0.1',
         port: '8000',
-        pathname: '/storage/**',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.aqualab.ma',
+        pathname: '/uploads/**',
       },
     ],
   },
@@ -28,7 +33,7 @@ const nextConfig = {
     return [
       {
         source: '/media/:path*',
-        destination: `${apiUrl}/storage/:path*`,
+        destination: `${apiUrl}/uploads/:path*`,
       },
     ]
   },

@@ -68,8 +68,8 @@ export default function RecrutementPage() {
     return (
         <PageTransition>
             <PageHero
-                title="Rejoignez-Nous"
-                subtitle="Vous êtes passionné(e) par les technologies et l'équipement scientifique ? Découvrez nos offres ou envoyez une candidature spontanée."
+                title="Rejoignez notre équipe"
+                subtitle="Vous souhaitez évoluer au sein d'une entreprise innovante spécialisée dans les solutions industrielles, didactiques et de laboratoire ? Découvrez nos opportunités de carrière ou transmettez-nous votre candidature spontanée."
                 tag="Recrutement"
                 breadcrumbs={[{ label: 'Recrutement' }]}
             />

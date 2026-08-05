@@ -8,42 +8,37 @@ import './About.css'
 
 const timeline = [
     {
-      year: '2006',
-      title: 'Fondation',
-      desc: "Création d'Aqualab Technologie S.A.R.L à Casablanca, avec pour mission la distribution d'équipements scientifiques de qualité au Maroc."
-    },
-    {
       year: '2010',
       title: 'Développement',
-      desc: 'Extension du portefeuille produits et signature des premiers partenariats exclusifs avec des marques mondiales de référence.'
+      desc: "Élargissement de notre offre de solutions et signature de nos premiers partenariats exclusifs avec des fabricants internationaux de renom, renforçant ainsi notre expertise et notre présence sur le marché marocain."
     },
     {
       year: '2015',
-      title: 'Leader national',
-      desc: "Aqualab devient un acteur majeur dans la distribution de matériels industriels et scientifiques au Maroc, répondant aux attentes des plus grandes industries."
+      title: 'Croissance',
+      desc: "AQUALAB s'impose comme un partenaire de confiance des industriels, laboratoires et centres de recherche, en développant son expertise et en accompagnant les plus grands acteurs du marché marocain."
     },
     {
-      year: '2020',
+      year: '2019',
       title: 'Expansion',
-      desc: 'Augmentation de la capacité de stockage à 1200 m² et renforcement des équipes techniques pour répondre à la demande croissante.'
+      desc: "Renforcement de nos capacités opérationnelles avec l'extension de notre espace de stockage et le développement de nos équipes techniques, afin d'accompagner notre croissance et de répondre plus efficacement aux besoins de nos clients."
     },
     {
       year: '2026',
       title: 'Excellence continue',
-      desc: "Plus de 32 experts, 62M DH de chiffre d'affaires et des partenariats exclusifs avec les meilleurs fabricants mondiaux. L'intégration de nouvelles technologies renforce notre leadership."
+      desc: "Forts de plus de 32 collaborateurs, d'un réseau de partenaires internationaux et d'une expertise reconnue depuis plus de 18 ans, nous poursuivons notre développement en intégrant continuellement de nouvelles technologies et en renforçant notre offre de solutions au service de nos clients."
     },
     {
       year: '2031',
-      title: "Garantir l'excellence et l'innovation",
-      desc: "Nous continuerons à renforcer nos compétences techniques, à diversifier notre offre pour répondre aux besoins spécifiques du marché industriel et à élargir notre présence locale. Nous nous engageons à offrir des solutions sur mesure à nos clients, en intégrant les dernières avancées technologiques et en favorisant des relations clients solides et durables. Notre objectif est d'être un leader reconnu dans l'industrie, en offrant un service exceptionnel, des produits de qualité supérieure et une expertise inégalée."
+      title: 'Innovation & Excellence',
+      desc: "Poursuivre notre croissance en renforçant notre expertise technique, en développant des solutions toujours plus innovantes et en consolidant notre présence sur le marché. Notre ambition est de devenir le partenaire de référence en solutions industrielles, didactiques et de laboratoire, grâce à un service d'excellence, des technologies de pointe et un accompagnement durable de nos clients."
     }
 ]
 
 const values = [
-    { icon: Target, title: 'Mission', desc: 'Fournir des solutions industrielles et scientifiques de haute qualité pour accompagner le développement du tissu industriel marocain.' },
-    { icon: Eye, title: 'Vision', desc: 'Être le partenaire de référence en matière d\'équipements scientifiques et industriels au Maroc et en Afrique du Nord à l\'horizon 2030.' },
-    { icon: Award, title: 'Valeurs', desc: 'Excellence, intégrité, réactivité et engagement client. Chaque décision est guidée par la satisfaction et la fidélité de nos partenaires.' },
-    { icon: Globe, title: 'Portée', desc: 'Présents sur l\'ensemble du territoire marocain avec un réseau logistique optimisé pour garantir des délais de livraison compétitifs.' },
+    { icon: Target, title: 'Mission', desc: 'Accompagner nos clients avec des solutions industrielles, didactiques et de laboratoire innovantes, en leur offrant un accompagnement complet, de l\'étude à la maintenance, pour garantir la performance, la fiabilité et la pérennité de leurs installations.' },
+    { icon: Eye, title: 'Vision', desc: 'Être le partenaire de référence en solutions industrielles, didactiques et de laboratoire au Maroc, et un acteur reconnu en Afrique' },
+    { icon: Award, title: 'Valeur', desc: 'Excellence, intégrité, réactivité, innovation et engagement client. Ces valeurs guident chacune de nos actions et reflètent notre volonté d\'offrir des solutions fiables, un accompagnement de proximité et un service de qualité, dans une relation de confiance durable avec nos clients et partenaires.' },
+    { icon: Globe, title: 'Portée', desc: 'Présents sur l\'ensemble du territoire marocain, nous accompagnons nos clients grâce à une organisation logistique performante, garantissant des interventions rapides et des délais d\'approvisionnement optimisés.' },
 ]
 
 const breadcrumbs = [{ label: 'À Propos' }]
@@ -69,16 +64,13 @@ export default function AboutPage() {
                                 </h2>
                                 <div className="divider" />
                                 <p>
-                                    Aqualab Technologie est une société marocaine S.A.R.L spécialisée dans l'importation,
-                                    la distribution et l'installation de matériels industriels, scientifiques et de laboratoire.
+                                    AQUALAB Technologie est une société marocaine spécialisée dans les solutions industrielles, scientifiques, didactiques et de laboratoire.
                                 </p>
                                 <p>
-                                    Avec plus de 18 ans d'expérience, nous sommes devenus un acteur incontournable dans notre domaine au Maroc,
-                                    en représentant exclusivement certaines des plus grandes marques mondiales.
+                                    Depuis plus de 18 ans, nous accompagnons les industriels, les laboratoires, les établissements d'enseignement et les centres de recherche dans la réalisation de leurs projets, en proposant des solutions complètes allant de l'étude et du conseil à la fourniture des équipements, l'installation, la mise en service, la formation, le service après-vente et la maintenance.
                                 </p>
                                 <p>
-                                    Notre équipe de 32 experts passionnés met tout en œuvre pour offrir à nos clients les meilleures
-                                    solutions tecniques, adaptées à leurs besoins spécifiques.
+                                    Grâce à un réseau de partenaires internationaux et à la représentation exclusive de plusieurs marques de renommée mondiale, nous mettons à la disposition de nos clients des technologies innovantes, fiables et performantes. Forte d'une équipe de 32 collaborateurs qualifiés, AQUALAB s'engage à fournir un accompagnement technique de proximité, des solutions sur mesure et un service de qualité, répondant aux exigences les plus élevées de ses clients.
                                 </p>
                             </div>
                         </SlideInLeft>

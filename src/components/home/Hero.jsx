@@ -54,16 +54,20 @@ export default function Hero() {
                         <span className="hero__title-line hero__title-accent">TECHNOLOGIE</span>
                     </motion.h1>
 
-                    <motion.p
+                    <motion.div
                         className="hero__subtitle"
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.5 }}
                     >
-                        Votre partenaire de confiance en importation et distribution de matériels
-                        <strong> industriels</strong>, <strong>scientifiques</strong> et de <strong>laboratoire</strong> au Maroc.
-                        Solutions innovantes, fiables et adaptées à vos besoins.
-                    </motion.p>
+                        <strong>Votre partenaire de confiance pour des solutions industrielles, didactiques, scientifiques et de laboratoire au Maroc.</strong>
+                        <p>
+                            AQUALAB vous accompagne à chaque étape de vos projets, de l'étude et du conseil jusqu'à la fourniture des équipements, l'installation, la mise en service, la formation, 
+                            le service après-vente, la maintenance préventive et corrective, ainsi que le support technique. 
+                            Nous proposons des solutions complètes, innovantes et sur mesure, parfaitement adaptées à vos exigences et 
+                            aux enjeux de votre activité.
+                        </p>
+                    </motion.div>
 
                     <motion.div
                         className="hero__actions"
