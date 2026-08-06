@@ -192,6 +192,7 @@
     background: rgba(255, 255, 255, 0.15);
     transition: all var(--transition-fast);
 }
+
 /* White mode */
 html[data-theme="light"] .navbar__toggle {
     color: #1f2937;

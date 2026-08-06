@@ -45,8 +45,6 @@ export default function RootLayout({ children }) {
     }}
   />
 
-  <link rel="icon" href="/logoicone.jpg" type="image/jpeg" />
-  <link rel="apple-touch-icon" href="/logoicone.jpg" />
 </head>
       <body suppressHydrationWarning>
         <JsonLd data={[organizationSchema, websiteSchema]} idPrefix="site-json-ld" />
