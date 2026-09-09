@@ -9,6 +9,7 @@ import AppImage from '@/components/ui/AppImage'
 import { PageTransition, FadeUp } from '@/components/ui/Animations'
 import ProductItemCard from '@/components/products/ProductItemCard'
 import { getCategoryPath, getProductGroupLabel } from '@/lib/products'
+import { slugifyItemName } from '@/data/seo'
 import '@/components/ui/PartnerLogo.css'
 import './Products.css'
 
@@ -95,12 +96,17 @@ export default function ProductCategoryPage({
                                     className="products-detail__list products-detail__list--grid"
                                     aria-label={`Produits ${category.title}`}
                                 >
-                                    {items.map((item, index) => (
-                                        <ProductItemCard
-                                            key={typeof item === 'string' ? item : item.name || index}
-                                            item={item}
-                                        />
-                                    ))}
+                                    {items.map((item, index) => {
+                                        const name = typeof item === 'string' ? item : (item?.name ?? '')
+                                        const anchorId = slugifyItemName(name)
+                                        return (
+                                            <ProductItemCard
+                                                key={anchorId || index}
+                                                item={item}
+                                                id={anchorId}
+                                            />
+                                        )
+                                    })}
                                 </ul>
 
                                 <div className="products-detail__footer">

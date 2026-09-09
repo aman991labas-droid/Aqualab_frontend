@@ -6,7 +6,7 @@ import AppImage from '@/components/ui/AppImage'
 import ImageLightbox from '@/components/ui/ImageLightbox'
 import { normalizeProductItem } from '@/lib/products'
 
-export default function ProductItemCard({ item }) {
+export default function ProductItemCard({ item, id }) {
     const { name, images, image, imageAlt, details } = normalizeProductItem(item)
     const [lightboxOpen, setLightboxOpen] = useState(false)
     const [activeIndex, setActiveIndex] = useState(0)
@@ -43,7 +43,7 @@ export default function ProductItemCard({ item }) {
 
     return (
         <>
-            <li className="products-detail__item-card">
+            <li id={id} className="products-detail__item-card">
                 {hasImages ? (
                     <div className="products-detail__item-card-gallery">
                         <div className="products-detail__item-card-stage">

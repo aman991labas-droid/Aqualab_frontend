@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { buildPageMetadata } from '@/lib/metadata'
 import JsonLd from '@/components/seo/JsonLd'
-import { buildBreadcrumbSchema, buildProductSchema } from '@/data/seo'
+import { buildBreadcrumbSchema, buildProductSchema, buildItemListSchema } from '@/data/seo'
 import {
   getAllArticles,
   getAllCategories,
@@ -61,7 +61,7 @@ export default async function Page({ params }) {
 
   return (
     <>
-      <JsonLd data={[buildProductSchema(category), buildBreadcrumbSchema(breadcrumbs)]} />
+      <JsonLd data={[buildProductSchema(category), buildBreadcrumbSchema(breadcrumbs), buildItemListSchema(category)]} />
       <ProductCategoryPage
         category={category}
         allCategories={allCategories}

@@ -127,3 +127,45 @@ export function buildArticleSchema(article, categoryLabel) {
         mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     }
 }
+
+/**
+ * Converts a product item name into a URL-safe anchor slug.
+ * e.g. "Stéréomicroscopes série M (M60)" → "stereomicroscopes-serie-m-m60"
+ */
+export function slugifyItemName(name) {
+    return (name ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80)
+}
+
+/**
+ * ItemList schema — lists all product items within a category page.
+ * Each item gets an anchor URL so Google can link directly to it.
+ * Compatible with Google's rich results for product lists.
+ */
+export function buildItemListSchema(category) {
+    const pageUrl = buildCanonicalPath(`/produits/${category.slug}`)
+    const items = (category.items ?? []).map((item, index) => {
+        const name = typeof item === 'string' ? item : (item?.name ?? '')
+        const anchor = slugifyItemName(name)
+        return {
+            '@type': 'ListItem',
+            position: index + 1,
+            name,
+            url: `${pageUrl}#${anchor}`,
+        }
+    })
+
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: `${category.title} — Équipements disponibles`,
+        description: category.shortDesc,
+        numberOfItems: items.length,
+        itemListElement: items,
+    }
+}
