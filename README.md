@@ -1,4 +1,4 @@
-# 🌊 Aqualab Technologie — Plateforme Web Full-Stack
+# Aqualab Technologie — Plateforme Web Full-Stack
 
 > Application web complète pour **Aqualab Technologie**, entreprise marocaine basée à Casablanca (depuis 2006), spécialisée dans l'importation et la distribution de matériels industriels, scientifiques et de laboratoire.
 
